@@ -1,0 +1,18 @@
+id: retry-after-case
+title: Retry-After header is only matched in lowercase
+category: bugfix
+difficulty: L0
+tags: [python, single-file, test-driven]
+context_mode: none
+timeout_s: 600
+
+# The failing test is handed to the agent, so it must not be edited away.
+immutable:
+  - tests/test_retry.py
+
+fail_to_pass:
+  - evaluation/tests/test_retry.py::test_matches_header_case_insensitively
+
+pass_to_pass:
+  - evaluation/tests/test_retry.py::test_missing_header_returns_none
+  - evaluation/tests/test_retry.py::test_plain_integer_seconds
