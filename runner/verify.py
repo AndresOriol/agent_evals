@@ -15,7 +15,19 @@ from pathlib import Path
 
 from runner import scenario as scenario_mod
 
+_DIFF_HEADER = re.compile(r"^diff --git a/[^/]+/(.*) b/[^/]+/(.*)$", re.MULTILINE)
 _DIFF_PREFIX = re.compile(r"^(--- a|\+\+\+ b)/[^/]+/", re.MULTILINE)
+
+
+def _normalize(patch_text: str) -> str:
+    """Strip the comparison dir out of every path `git diff --no-index` emits.
+
+    The `diff --git` header needs rewriting too, not just the ---/+++ lines:
+    `git apply` reads the header names, so a doubled prefix left there makes
+    the patch apply to the wrong path.
+    """
+    patch_text = _DIFF_HEADER.sub(r"diff --git a/\1 b/\2", patch_text)
+    return _DIFF_PREFIX.sub(r"\1/", patch_text)
 
 
 def make_diff(seed_dir: Path, work_dir: Path) -> str:
@@ -26,7 +38,7 @@ def make_diff(seed_dir: Path, work_dir: Path) -> str:
     # --no-index exits 1 when there are differences; only >1 is a real error.
     if result.returncode > 1:
         raise RuntimeError(f"git diff failed: {result.stderr.strip()}")
-    return _DIFF_PREFIX.sub(r"\1/", result.stdout)
+    return _normalize(result.stdout)
 
 
 def _pytest(node_id: str, cwd: Path, timeout: int = 300) -> tuple:
