@@ -66,6 +66,10 @@ def _outcome(execution: dict, verification: dict, tampered: list) -> str:
 def execute_run(repo: Path, scenario, task, config, rep: int,
                 results_dir: Path) -> dict:
     run_id = _run_id(scenario, task, config, rep)
+    # Absolute: the agent subprocess runs with cwd set to its worktree, so a
+    # relative trace path would make it write the trace inside the worktree
+    # and leave every trace-derived metric silently reading zero.
+    results_dir = Path(results_dir).resolve()
     out_dir = results_dir / "runs" / run_id
     out_dir.mkdir(parents=True, exist_ok=True)
 
