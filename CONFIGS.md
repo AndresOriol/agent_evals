@@ -13,7 +13,34 @@ the simpler configuration.
 
 | Config | Ref / SHA | Change | Suite | Result | Verdict |
 | --- | --- | --- | --- | --- | --- |
-| `baseline` | `master` | — | — | see `results/index.jsonl` | reference point |
+| `baseline` | `e1e5417` | — | `retry-after-case` L0, n=2 | 1 pass, 1 crash | reference point |
+
+### baseline, first measurement (2026-07-29)
+
+Two reps of one L0 task. Not a rate — n=2 establishes the pipeline works and
+gives a first look at variance, nothing more.
+
+| | rep 1 | rep 2 |
+| --- | --- | --- |
+| outcome | pass | crash (`stopping`) |
+| steps | 6 | 5 |
+| provider calls | 10 | 11 |
+| failover bounces | 4 | 8 |
+| tokens in | 89,260 | 55,126 |
+| distinct models | 5 | 7 |
+| wall time | 19.4s | 15.6s |
+
+Two observations already worth acting on:
+
+1. **Rep 2 crashed on a dead model, not on the task.** Groq returns
+   `404 model_not_found` for `meta-llama/llama-4-scout-17b-16e-instruct`. A 404
+   is not in the router's transient set, so it propagates and kills the whole
+   run. A decommissioned model in the pool should be disabled permanently and
+   skipped, the same way a rate-limited one is skipped temporarily — otherwise
+   one stale config entry can end an unattended run.
+2. **A one-line fix costs 5–7 distinct models and ~90k input tokens.** The
+   failover machinery works, but the pool is being walked hard for a trivial
+   task. Worth understanding before reading anything into efficiency numbers.
 
 ## Stub configurations
 
