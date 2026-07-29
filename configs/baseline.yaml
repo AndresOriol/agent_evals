@@ -1,0 +1,5 @@
+name: baseline
+repo: ../../free_coding_agent
+ref: master
+overrides:
+  env: {}
