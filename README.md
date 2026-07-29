@@ -1,79 +1,70 @@
 # agent_evals
 
-Scenario-based evaluation for the coding agent in
-[free_coding_agent](../free_coding_agent). Answers one question: **did a change
-to the harness actually make the agent better?**
+Evaluation **scenarios** for the coding agent in
+[llm_free_pool_router](https://github.com/AndresOriol/llm_free_pool_router)
+(`free_coding_agent` locally). This repo is data only — no harness code, no
+results. The runner lives in that repo under `evals/`, and so does everything
+it produces.
 
-The design — metrics, the failure taxonomy, fair comparison, the promotion
-rule — lives in [free_coding_agent/docs/EVAL.md](../free_coding_agent/docs/EVAL.md).
-This repo is the implementation and the data.
+Coding agents act on code, so the natural way to store a test case is as a
+repo state. That's all a scenario is: a commit whose tree is a codebase with
+something wrong in it, plus the material needed to grade an attempt.
 
-It's deliberately a separate repo: agent configurations are *branches* of
-`free_coding_agent`, so results kept there would churn on every branch switch
-and conflict on every merge. Here they're a stable, append-only record across
-all configurations — and they don't expire the way hosted traces do.
+## Structure
 
-## Use
-
-```bash
-python -m runner validate                                   # scenarios well-formed?
-python -m runner run --config baseline --suite smoke --reps 3
-python -m runner run --config baseline --config my-branch --reps 5   # interleaved
-python -m runner show
-```
-
-Runs are serial and interleaved across configs on purpose: parallel runs
-contend for the same free-tier pool, and running all of A before all of B hands
-one config a fresh pool and the other an exhausted one.
-
-## Layout
+One **branch per topic**; each **commit on that branch is a scenario**, named
+by a tag:
 
 ```
-runner/          the harness
-configs/*.yaml   agent configurations (a pinned ref of the agent repo + overrides)
-results/
-  index.jsonl    one row per run — the queryable table
-  runs/<id>/     run.json, trace.jsonl, stdout.log, diff.patch, verify.txt
+topic/<topic>              the topic's line of scenarios
+scenario/<topic>/<id>      tag on the commit that is that scenario
 ```
 
-## Scenarios
+Runs always reference the tag. Tags are never moved — to change a scenario,
+commit again and tag the new one, so results citing the old tag stay
+reproducible.
 
-Each scenario is an **orphan branch** frozen as an immutable **tag**:
+Inside a scenario commit:
 
-```
-scenario/<id>          the tree, editable
-scenario/<id>/v1       frozen; what runs reference
-```
-
-Never move a tag. Edit the branch and cut `v2` — old results stay reproducible
-because they name the exact tag they ran against.
-
-A scenario tree holds:
-
-| Path | Given to the agent? | Purpose |
+| Path | Agent sees it? | Purpose |
 | --- | --- | --- |
-| `seed/` | **yes** — copied to its workdir | the starting state |
-| `tasks/*.md` | prompt only | one or more prompts against this seed |
-| `verify/` | **no** | hidden tests, overlaid on a copy after the run |
-| `reference/solution.patch` | **no** | validation gate + judge context |
-| `scenario.yaml` | no | metadata, `fail_to_pass` / `pass_to_pass`, immutable manifest |
+| everything at the root | **yes** | the code state, copied into the agent's workdir |
+| `tasks/*.md` | prompt only | one or more tasks posed against this code |
+| `evaluation/` | **no** | criteria, external tests, reference solution |
+| `scenario.yaml` | **no** | metadata, `fail_to_pass` / `pass_to_pass`, immutable list |
 
-`git archive` extracts only `seed/`, so no `.git` reaches the workdir — the
-agent is jailed there and would otherwise be able to read the hidden tests and
-the reference solution.
+`evaluation/` is withheld because it holds the tests the attempt is scored
+with — an agent that can read them can satisfy them without solving anything.
+`scenario.yaml` is withheld for the same reason: it names those tests. The
+runner asserts the withholding actually happened rather than trusting it.
 
-### Adding one
+## The agent never writes here
+
+A run extracts the code state into a throwaway directory with `git archive`,
+so no `.git` reaches the workdir: the agent cannot commit, reach another
+scenario, or read `evaluation/`. Everything it did is discarded by deleting a
+temp dir — nothing in this repo is modified, so nothing needs reverting.
+
+## Adding a scenario
 
 ```bash
-git checkout --orphan scenario/my-bug
-git rm -rf .
-# author seed/, verify/, tasks/, reference/, scenario.yaml
-git add -A && git commit -m "scenario: my-bug"
-git tag scenario/my-bug/v1
-git checkout master
-python -m runner validate --scenario my-bug
+git checkout topic/<topic>            # or: git checkout --orphan topic/<new>
+# edit the code state, tasks/, evaluation/, scenario.yaml
+git add -A && git commit -m "scenario: <id>"
+git tag scenario/<topic>/<id>
+
+cd ../free_coding_agent
+python -m evals validate --scenario scenario/<topic>/<id>
 ```
 
-`validate` is the gate that keeps the set honest: the seed must **fail** the
-`fail_to_pass` tests while **passing** the `pass_to_pass` ones, and the
-reference solution must pass both. A scenario that fails it never runs.
+`validate` is the gate that keeps the set honest: against the untouched code
+every `fail_to_pass` test must **fail** and every `pass_to_pass` test must
+**pass**, and applying `evaluation/solution.patch` must make all of them pass.
+A scenario that fails the gate never runs — otherwise it silently hands every
+configuration a free pass or a free fail.
+
+## Topics
+
+| Branch | Covers |
+| --- | --- |
+| `topic/http-headers` | parsing provider HTTP responses (headers, retry signals) |
