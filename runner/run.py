@@ -86,6 +86,7 @@ def execute_run(repo: Path, scenario, task, config, rep: int,
                              out_dir / "trace.jsonl", scenario.timeout_s)
 
         tampered = verify_mod.check_integrity(before, workdir)
+        verify_mod.prune_artifacts(workdir)
         patch = verify_mod.make_diff(seed, workdir)
         verification = verify_mod.verify(repo, scenario, workdir, base / "verified")
 

@@ -30,6 +30,24 @@ def _normalize(patch_text: str) -> str:
     return _DIFF_PREFIX.sub(r"\1/", patch_text)
 
 
+ARTIFACT_DIRS = {"__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache"}
+
+
+def prune_artifacts(root: Path) -> None:
+    """Delete test/build caches before diffing.
+
+    The agent is told to run the tests, which creates .pytest_cache and
+    __pycache__ in its workdir. Left in, they dominate the diff -- inflating
+    diff_lines and files_touched, and telling the judge the agent sprayed
+    changes across the tree when it changed one function.
+    """
+    for path in sorted(root.rglob("*"), key=lambda p: -len(p.parts)):
+        if path.is_dir() and path.name in ARTIFACT_DIRS:
+            shutil.rmtree(path, ignore_errors=True)
+        elif path.is_file() and path.suffix == ".pyc":
+            path.unlink(missing_ok=True)
+
+
 def make_diff(seed_dir: Path, work_dir: Path) -> str:
     """Unified diff of what the agent changed, with plain a/ b/ prefixes."""
     result = subprocess.run(
