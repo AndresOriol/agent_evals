@@ -120,7 +120,10 @@ def classify_failure(outcome: str, events: list, gold: set, touched: set,
     Ordered most-external-cause first: a run killed by the step budget never
     got the chance to demonstrate a retrieval or reasoning failure.
     """
-    if outcome == "pass":
+    # Tampering is an integrity verdict, not a capability one. Giving it a
+    # failure class too would average it into the taxonomy counts, which is
+    # exactly what tracking it separately is meant to prevent.
+    if outcome in {"pass", "tampered"}:
         return ""
     if outcome in {"timeout", "crash"} or "GraphRecursionError" in stderr:
         return "stopping"

@@ -1,5 +1,7 @@
 name: baseline
 repo: ../../free_coding_agent
 ref: master
+# Keys are injected from here into the subprocess: worktrees never contain .env
+env_file: ../../free_coding_agent/llm_router/.env
 overrides:
   env: {}

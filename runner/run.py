@@ -30,9 +30,12 @@ def _execute(config, workdir: Path, prompt: str, trace_path: Path,
              timeout_s: int) -> dict:
     """Launch the agent one-shot with the prompt on stdin."""
     cmd = [part.format(workdir=str(workdir)) for part in config.agent_cmd]
-    env = {**os.environ, **config.env, "EVAL_TRACE_FILE": str(trace_path)}
+    env = {**os.environ, **config.secrets, **config.env,
+           "EVAL_TRACE_FILE": str(trace_path)}
     if config.router_config:
-        env["ROUTER_CONFIG"] = config.router_config
+        # Read by the agent's loader; lets a configuration swap the model pool,
+        # which is the comparison this project most needs to be able to make.
+        env["ROUTER_CONFIG"] = str((config.repo / config.router_config).resolve())
 
     started = time.time()
     try:

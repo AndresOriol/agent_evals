@@ -68,13 +68,14 @@ def cmd_run(args) -> int:
                          + "\n  ".join(problems))
 
     plan = list(run_mod.interleaved(configs, tasks, args.reps))
+    results = Path(args.results)
     print(f"{len(plan)} run(s): {len(configs)} config(s) x {len(tasks)} task(s) "
           f"x {args.reps} rep(s), interleaved, serial.\n")
 
     for index, (config, scenario, task, rep) in enumerate(plan, 1):
         print(f"[{index}/{len(plan)}] {scenario.id}/{task.id} "
               f"{config.name} rep{rep} ... ", end="", flush=True)
-        record = run_mod.execute_run(REPO, scenario, task, config, rep, RESULTS)
+        record = run_mod.execute_run(REPO, scenario, task, config, rep, results)
         detail = record["failure_class"] or ""
         print(f"{record['outcome']}{' (' + detail + ')' if detail else ''} "
               f"[{record['wall_time_s']}s, {record['provider_calls']} calls]")
@@ -82,7 +83,7 @@ def cmd_run(args) -> int:
 
 
 def cmd_show(args) -> int:
-    path = RESULTS / run_mod.INDEX
+    path = Path(args.results) / run_mod.INDEX
     if not path.is_file():
         sys.exit("No results yet.")
     rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
@@ -129,10 +130,15 @@ def main() -> int:
     run.add_argument("--tags", nargs="*")
     run.add_argument("--reps", type=int, default=3)
     run.add_argument("--skip-validate", action="store_true")
+    # Self-tests point this elsewhere so stub runs never land in the real
+    # record -- a leaderboard mixing stubbed and measured runs is worse than
+    # no leaderboard.
+    run.add_argument("--results", default=str(RESULTS))
     run.set_defaults(func=cmd_run)
 
     show = sub.add_parser("show", help="summarize recorded runs")
     show.add_argument("--config", action="append")
+    show.add_argument("--results", default=str(RESULTS))
     show.set_defaults(func=cmd_show)
 
     args = parser.parse_args()
