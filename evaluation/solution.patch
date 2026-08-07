@@ -1,0 +1,55 @@
+--- a/durations.py
++++ b/durations.py
+@@ -4,15 +4,25 @@
+ the one place that decides what a human is allowed to type.
+ """
+ 
+-UNITS = {"s": 1, "m": 60, "h": 3600}
++import re
++
++UNITS = {
++    "s": 1, "sec": 1, "secs": 1, "second": 1, "seconds": 1,
++    "m": 60, "min": 60, "mins": 60, "minute": 60, "minutes": 60,
++    "h": 3600, "hr": 3600, "hrs": 3600, "hour": 3600, "hours": 3600,
++}
++
++# A number, optional space, then the unit. Written as one pattern so "5m",
++# "5 m" and "5 minutes" cannot drift into three different parsing rules.
++_DURATION = re.compile(r"^(\d+)\s*([a-z]+)$")
+ 
+ 
+ def parse_duration(text):
+-    """Seconds for a duration like '30s', '5m' or '2h'."""
+-    text = text.strip().lower()
+-    if not text:
+-        raise ValueError("empty duration")
+-    unit = text[-1]
++    """Seconds for a duration like '30s', '5 min' or '2 hours'."""
++    match = _DURATION.match(text.strip().lower())
++    if match is None:
++        raise ValueError(f"not a duration: {text!r}")
++    amount, unit = match.groups()
+     if unit not in UNITS:
+         raise ValueError(f"unknown unit in {text!r}")
+-    return int(text[:-1]) * UNITS[unit]
++    return int(amount) * UNITS[unit]
+--- a/README.md
++++ b/README.md
+@@ -2,11 +2,12 @@
+ 
+ Parses the duration strings used in this project's configuration files.
+ 
+-    parse_duration("30s")   # -> 30
+-    parse_duration("5m")    # -> 300
+-    parse_duration("2h")    # -> 7200
++    parse_duration("30s")     # -> 30
++    parse_duration("5 min")   # -> 300
++    parse_duration("2 hours") # -> 7200
+ 
+ ## Accepted format
+ 
+-A whole number followed by a one-letter unit: `s` for seconds, `m` for minutes,
+-`h` for hours. Anything else raises `ValueError`.
++A whole number, an optional space, then the unit. The unit may be the single
++letter (`s`, `m`, `h`) or the word (`sec`, `min`, `hour`, and their plurals).
++Anything else raises `ValueError` — an unrecognised unit is never guessed at.
