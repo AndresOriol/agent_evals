@@ -1,0 +1,26 @@
+id: duration-notes
+title: The parser rejects the durations the logs actually write
+category: feature
+difficulty: L1
+tags: [python, single-file, notes-driven, docs, session]
+context_mode: none
+timeout_s: 1200
+
+# The visible suite states behaviour that must survive the change, so it must
+# not be edited away.
+immutable:
+  - tests/test_durations.py
+
+# Two of these grade the documentation. A session that fixes the code and leaves
+# the README asserting a one-letter unit has failed the part the human reads.
+fail_to_pass:
+  - evaluation/tests/test_durations_hidden.py::test_spelled_out_minutes
+  - evaluation/tests/test_durations_hidden.py::test_spelled_out_seconds
+  - evaluation/tests/test_durations_hidden.py::test_spelled_out_hours_plural
+  - evaluation/tests/test_durations_hidden.py::test_word_unit_without_a_space
+  - evaluation/tests/test_durations_hidden.py::test_readme_drops_the_claim_that_is_now_false
+  - evaluation/tests/test_durations_hidden.py::test_readme_shows_a_spelled_out_example
+
+pass_to_pass:
+  - evaluation/tests/test_durations_hidden.py::test_compact_form_still_works
+  - evaluation/tests/test_durations_hidden.py::test_unknown_unit_is_still_rejected
