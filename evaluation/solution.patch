@@ -1,0 +1,50 @@
+--- a/alerts/rules.py
++++ b/alerts/rules.py
+@@ -2,5 +2,9 @@
+ 
+ 
+ def should_alert(value, threshold):
+-    """True when the measurement has crossed the threshold."""
+-    return value >= threshold
++    """True when the measurement has crossed the threshold.
++
++    Strictly above: a value sitting exactly on the threshold has not crossed
++    it, and paging on it is what made the threshold feel one point too low.
++    """
++    return value > threshold
+--- a/alerts/message.py
++++ b/alerts/message.py
+@@ -5,6 +5,12 @@
+ """
+ 
+ 
+-def format_alert(name, value):
+-    """The one-line message for an alert."""
++def format_alert(name, value, unit=""):
++    """The one-line message for an alert.
++
++    `unit` is optional so existing callers are unaffected; when given it
++    follows the value, because "82" alone does not say 82 of what.
++    """
++    if unit:
++        return f"{name} is {value} {unit}"
+     return f"{name} is {value}"
+--- a/docs/alerts.md
++++ b/docs/alerts.md
+@@ -2,11 +2,12 @@
+ 
+ ## When an alert fires
+ 
+-`should_alert(value, threshold)` returns true when the value is greater than or
+-equal to the threshold, so a measurement landing exactly on the threshold does
++`should_alert(value, threshold)` returns true when the value is strictly above
++the threshold, so a measurement landing exactly on the threshold does not
+ alert.
+ 
+ ## What the message says
+ 
+-`format_alert(name, value)` produces `"<name> is <value>"` — for example,
+-`cpu is 82`.
++`format_alert(name, value, unit="")` produces `"<name> is <value>"`, and
++appends the unit when one is given — for example, `cpu is 82 %`. The unit is
++optional, so callers that do not pass one are unaffected.

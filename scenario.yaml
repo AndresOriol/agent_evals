@@ -1,0 +1,25 @@
+id: threshold-off-by-one
+title: Alerts fire on the threshold, and the message omits the unit
+category: bugfix
+difficulty: L2
+tags: [python, multi-file, notes-driven, docs, session]
+context_mode: none
+timeout_s: 1800
+
+# States behaviour that must survive both changes, so it must not be edited away.
+immutable:
+  - tests/test_alerts.py
+
+# Two independent changes in two files, plus the page that documents both. A
+# session that lands one and forgets the other is visible here rather than
+# averaged away.
+fail_to_pass:
+  - evaluation/tests/test_alerts_hidden.py::test_equal_does_not_alert
+  - evaluation/tests/test_alerts_hidden.py::test_unit_is_appended
+  - evaluation/tests/test_alerts_hidden.py::test_docs_no_longer_promise_greater_or_equal
+  - evaluation/tests/test_alerts_hidden.py::test_docs_mention_the_unit
+
+pass_to_pass:
+  - evaluation/tests/test_alerts_hidden.py::test_just_above_still_alerts
+  - evaluation/tests/test_alerts_hidden.py::test_below_still_quiet
+  - evaluation/tests/test_alerts_hidden.py::test_unit_stays_optional
