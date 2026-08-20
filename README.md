@@ -65,6 +65,14 @@ configuration a free pass or a free fail.
 
 ## Topics
 
-| Branch | Covers |
-| --- | --- |
-| `topic/http-headers` | parsing provider HTTP responses (headers, retry signals) |
+| Branch | Scenarios | Covers |
+| --- | --- | --- |
+| `topic/http-headers` | `retry-after-case` (L0) | parsing provider HTTP responses (headers, retry signals) |
+| `topic/sessions` | `duration-notes` (L1) | a session working a project from its notes file |
+| `topic/alerts` | `threshold-off-by-one` (L2) | two independent changes plus the page that documents both |
+| `topic/ledger` | `stale-categories` (L1), `count-and-share` (L2, trap) | an expense ledger; localising from a symptom, and a brief that contradicts the docs |
+
+A topic with more than one scenario is a **line of history**: each commit is the
+previous scenario's code with its fix applied, so the topic reads as a codebase
+evolving rather than as unrelated trees. `topic/ledger` is the first of those —
+`count-and-share` starts from the tree `stale-categories` ends at.
