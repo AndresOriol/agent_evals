@@ -33,3 +33,13 @@ def test_summary_of_a_different_month():
     summary = summarise(entries)
     assert summary["totals"]["travel"] == 4500
     assert summary["total"] == 4500
+
+
+def test_summarise_does_not_modify_the_entries_it_is_given():
+    entries = [
+        {"date": "2026-03-02", "category": "food", "amount": 1250},
+        {"date": "2026-03-01", "category": "rent", "amount": 90000},
+    ]
+    before = [dict(entry) for entry in entries]
+    summarise(entries)
+    assert entries == before
