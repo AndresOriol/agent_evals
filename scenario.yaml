@@ -1,0 +1,24 @@
+id: stale-categories
+title: Later monthly summaries list earlier months' categories
+category: bugfix
+difficulty: L1
+tags: [python, multi-file, symptom-only, notes-driven, session]
+context_mode: none
+timeout_s: 1800
+
+# States the per-category totals and nothing about the category list, which is
+# how the defect survives a green suite. It must not be edited away.
+immutable:
+  - tests/test_ledger.py
+
+# All three need more than one report in a process. The visible suite never
+# renders two, so none of this is reachable from the code state the agent sees.
+fail_to_pass:
+  - evaluation/tests/test_report_hidden.py::test_a_report_lists_only_its_own_categories
+  - evaluation/tests/test_report_hidden.py::test_a_report_totals_only_its_own_categories
+  - evaluation/tests/test_report_hidden.py::test_the_order_a_month_is_rendered_in_does_not_change_it
+
+pass_to_pass:
+  - evaluation/tests/test_report_hidden.py::test_a_single_report_is_unchanged
+  - evaluation/tests/test_report_hidden.py::test_totals_are_still_right_on_a_second_report
+  - evaluation/tests/test_report_hidden.py::test_amounts_still_round_trip
