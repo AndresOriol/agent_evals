@@ -15,11 +15,11 @@ The repo holds two things:
 
 ## `master` is documentation
 
-Two pages, both **generated**, neither read by any run:
+Two sets of pages, all **generated**, none read by any run:
 
 | Page | What it is |
 | --- | --- |
-| [docs/scenarios/](docs/scenarios/README.md) | Every scenario: its branch and tag, category, level, tasks, and the page explaining what it probes and how the test sets encode that. Ends with a **Gaps** section — uncovered categories and levels, topic branches with no scenario, scenarios missing a description or a test set. |
+| [docs/scenarios/](docs/scenarios/README.md) | The catalogue, as a small wiki: an index — the whole set in one table, then the same scenarios grouped by category, by level and by topic line — and **one page per scenario** under `docs/scenarios/<topic>/<id>.md`, holding its branch and tag, category, level, tags, tasks with their prompts, the page explaining what it probes, and the `fail_to_pass` / `pass_to_pass` / `immutable` lists it is scored with. Pages link to each other, so a topic line can be walked from its first scenario to its last. The index ends with a **Gaps** section — uncovered categories and levels, topic branches with no scenario, scenarios missing a description or a test set. |
 | [docs/results/](docs/results/README.md) | What each agent version scored. One row per configuration-at-a-commit, with a Wilson interval on the pass rate, mean `tokens_in`, and the failure-class mix; then a per-scenario view of which scenarios still discriminate, then every run by id. |
 
 Rebuild both from the harness repo:
@@ -74,8 +74,12 @@ runner asserts the withholding actually happened rather than trusting it.
 
 `evaluation/scenario.md` has four fixed sections — **The seed**, **The task**,
 **The challenge**, **What it checks** — because the catalogue generator reads
-them. The first line of *The challenge* becomes the one-line summary in the
-index table, so write it as a single self-contained sentence.
+them, and they become the body of the scenario's own page. The first line of
+*The challenge* becomes the one-line summary in the index table and the
+standfirst on the page, so write it as a single self-contained sentence. A
+backticked scenario id in the prose — `` `duration-notes` `` — is turned into a
+link to that scenario's page, so refer to a sibling that way rather than by
+describing it.
 
 ## The agent never writes here
 
