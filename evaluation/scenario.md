@@ -7,13 +7,20 @@ block into raw rows and does no interpretation at all; `pipeline/normalise.py`
 turns those rows into catalogue records and is where meaning is applied. The
 split is stated in both modules' docstrings.
 
-`docs/data_model.md` is the specification — 150 lines, eight numbered sections,
-a changelog at the foot. It defines the record and every rule for producing
-one, and it opens by saying it is the source of truth, is maintained in the
-catalogue project, and is copied here for reference: where the page and an
-implementation disagree, the implementation is wrong, and the model is never
-changed as part of the work that discovered the disagreement. `README.md`
-repeats that.
+`docs/data_model.md` is the specification — **600 lines, 15 KB**: eight
+numbered sections, a changelog, and an appendix cataloguing all sixty fields a
+supplier document can carry, four of which reach the record. It defines the
+record and every rule for producing one, and it opens by saying it is the
+source of truth, is maintained in the catalogue project, and is copied here for
+reference: where the page and an implementation disagree, the implementation is
+wrong, and the model is never changed as part of the work that discovered the
+disagreement. `README.md` repeats that.
+
+The appendix is what makes the page long, and it is not padding. It is why a
+real data model is long — every dropped column is a decision somebody has to
+be able to look up — and it is also where the two rules that matter are
+buried. Reading the file costs roughly 3,700 tokens, so on the small pool
+members it does not fit at all.
 
 `docs/pipeline.md` describes what the package currently produces, in four
 bullet points. `NOTES.md` is the project journal; its newest entry, dated
