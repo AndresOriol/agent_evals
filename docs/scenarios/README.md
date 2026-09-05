@@ -10,25 +10,22 @@ moved. The prose under each one is its `evaluation/scenario.md`, withheld from
 the agent during a run and repeated here because this branch is not.
 
 
-**5 scenarios across 4 topics.**
+**10 scenarios across 9 topics.**
 
 ## The set
 
 | Scenario | Branch | Category | Level | Tasks | f2p / p2p | Probes |
 | --- | --- | --- | --- | --- | --- | --- |
 | [`scenario/alerts/threshold-off-by-one`](#scenarioalertsthreshold-off-by-one) | topic/alerts | bugfix | L2 | `session-from-notes` | 4 / 3 | Two unrelated changes in two files plus the page documenting both; landing one and stopping is the failure. |
+| [`scenario/bots/bots-to-base-class`](#scenariobotsbots-to-base-class) | topic/bots | refactor | L2 | `bots-as-classes`, `session-from-notes` | 3 / 7 | The refactor that was asked for flattens a difference between the three bots that only the documentation explains. |
+| [`scenario/export/stock-export`](#scenarioexportstock-export) | topic/export | generative | L2 | `build-the-exporter`, `session-from-notes` | 12 / 3 | The interface is given and the eight rules that make the file loadable are not, and the importer rejects the whole file on the first line it cannot parse. |
 | [`scenario/http-headers/retry-after-case`](#scenariohttp-headersretry-after-case) | topic/http-headers | bugfix | L0 | `fix-from-failing-test` | 1 / 2 | An L0 canary: the failing test names the file, the bug and the fix, so only a broken harness fails it. |
 | [`scenario/ledger/count-and-share`](#scenarioledgercount-and-share) | topic/ledger | trap | L2 | `count-and-share`, `session-from-notes` | 3 / 4 | The brief asks for two changes, and the second one is forbidden by an invariant the docs state. |
 | [`scenario/ledger/stale-categories`](#scenarioledgerstale-categories) | topic/ledger | bugfix | L1 | `session-from-notes`, `stale-categories` | 3 / 3 | A symptom and a green suite, with nothing naming the file â€” the whole probe is localisation. |
+| [`scenario/pipeline/model-v3-propagation`](#scenariopipelinemodel-v3-propagation) | topic/pipeline | long-context | L3 | `adapt-to-model`, `session-from-notes` | 3 / 7 | Two rules changed in a long specification, only one of them is in the changelog, and the obvious fix for the other destroys the distinction it exists to protect. |
 | [`scenario/sessions/duration-notes`](#scenariosessionsduration-notes) | topic/sessions | feature | L1 | `session-from-notes` | 6 / 2 | The requirement is in NOTES.md, not the prompt, and the README it makes false is graded like code. |
-
-## Gaps
-
-What the set does not cover. This is the section to read before authoring.
-
-- **Categories with no scenario:** generative, tests, refactor, long-context, ambiguous
-- **Levels with no scenario:** L3
-- **Topic branches carrying no scenario tag:** topic/pipeline
+| [`scenario/suite/cover-the-rejections`](#scenariosuitecover-the-rejections) | topic/suite | tests | L2 | `cover-the-rejections`, `session-from-notes` | 5 / 1 | A suite cannot be graded by running it, and the seed's suite is green for the wrong reason. |
+| [`scenario/usage/which-accounts-are-active`](#scenariousagewhich-accounts-are-active) | topic/usage | ambiguous | L2 | `session-from-notes` | 3 / 5 | Two readings of one word, both supported by the tree, and nobody awake to be asked which one was meant. |
 
 ## Scenarios
 
@@ -130,6 +127,230 @@ Tasks:
 - **`session-from-notes`** — suites ['session', 'full']. Read NOTES.md and do what the newest feedback asks for. Check your work by running `python -m pytest tests`, and update any documentation your change makes wrong before you finish.
 
 Verified by 4 `fail_to_pass` and 3 `pass_to_pass` tests; immutable: `tests/test_alerts.py`.
+
+### scenario/bots/bots-to-base-class
+
+**Three copies of one loop, and one of them differs on purpose**
+
+*refactor · L2 · python, multi-file, refactor, invariant, docs, notes-driven, session · branch topic/bots · timeout 1800s*
+
+**The seed**
+
+A lane-picking game and three bots that play it. `bots/engine.py` is the public
+surface â€” `play(name, lanes, turns)` returns a transcript of `(lane, reward)`
+pairs and `score` sums it â€” and `bots/registry.py` maps names to bots.
+
+Each bot is a module with a `decide(state)` function, and the three of them are
+the same twelve-line loop with two lines changed in the middle: walk the lanes,
+score each one, keep the best. `greedy` takes the highest value, `cautious` the
+lowest, `explorer` the highest among lanes it has not taken.
+
+The difference that matters is one operator. `greedy` and `explorer` compare
+with `>`, so a tie leaves the earlier index in place. `cautious` compares with
+`<=`, so a tie replaces it and the *last* tied lane wins. `docs/bots.md` gives
+that a section of its own â€” *Why `cautious` breaks ties the other way* â€” and
+explains it: a fresh board is flat, every lane ties, and if `cautious` broke
+ties low it would open every game on lane 0 alongside the other two. A year of
+tournament results assumes it.
+
+`tests/test_bots.py` has seven tests and they pass. None of them uses a flat
+board. `NOTES.md`'s newest entry, dated 2026-08-21, asks for the base class and
+states the constraint in the same paragraph.
+
+This scenario is drawn from `29d17ca7`, where the request was to turn each bot
+from a zip into a Python class deriving from a per-game base, and from
+`34265fe8`, where the modularisation request carried its invariant in the same
+sentence â€” restructure, and keep producing a single executable. The two
+ponytail audits, `42dfffaf` and `c57c0d42`, are the same shape asked as a
+simplification.
+
+**The task**
+
+Two task files. `tasks/session-from-notes.md` carries the suite's constant
+session prompt and routes the request through `NOTES.md`, where the contract is
+given: `Bot` in `bots/base.py`, subclasses implementing
+`score(self, index, value, state)`, an overridable `tie_break` returning
+`"low"` or `"high"`, `decide(state)` on the base, instances in the registry,
+and `engine.play` / `engine.score` keeping their signatures.
+
+`tasks/bots-as-classes.md` states the same contract directly. Neither mentions
+that one bot breaks ties differently.
+
+**The challenge**
+
+The refactor that was asked for flattens a difference between the three bots that only the documentation explains.
+
+Hoisting a shared loop into a base class is the obvious move and the right one.
+The loop being hoisted is not quite shared: two bots resolve ties toward the
+low index and one toward the high index, and the difference is an operator in
+the middle of the copied code rather than anything named. A base class written
+from `greedy` and checked against `explorer` agrees with both, and silently
+changes what `cautious` does.
+
+Nothing in the workdir pushes back. The visible suite passes seven tests on a
+board of `[1, 5, 2]`, where no two lanes tie, so it is green before the change
+and green after a flattened one. The only place the rule is written down is
+`docs/bots.md`, which the brief mentions as documentation to keep true rather
+than as evidence to read.
+
+The structure is easy and the invariant is the work â€” which is the inverse of
+every other scenario in the set, where the change is hard to find and cheap to
+make once found.
+
+**What it checks**
+
+`fail_to_pass` is the structure. `test_every_registered_bot_is_an_instance_of_the_base`
+imports `bots.base.Bot` and asserts the registry hands back instances of it.
+`test_a_new_bot_is_written_by_subclassing` is the payoff the notes ask for: it
+defines a subclass supplying only `score`, registers an instance and plays it
+through the engine, so a base class that does not actually own the loop fails
+here. `test_docs_describe_how_a_bot_is_written_now` requires `docs/bots.md` to
+have stopped telling people to write a `decide` function.
+
+`pass_to_pass` is the behaviour.
+`test_cautious_still_drifts_to_the_far_lane_on_a_flat_board` is the
+discriminator, and it is the only test in either set that uses a flat board: a
+flattened tie-break passes all three `fail_to_pass` tests and the entire
+visible suite, and fails this one.
+`test_greedy_and_explorer_still_break_ties_low` catches the mirror error.
+`test_the_three_transcripts_are_unchanged`,
+`test_explorer_still_falls_back_to_lane_zero`,
+`test_a_lane_never_goes_below_zero` and `test_score_still_sums_the_transcript`
+pin the rest of the engine.
+
+`test_docs_still_defend_the_tie_break` requires the section explaining
+`cautious` to survive the edit the brief asks for elsewhere on the same page.
+It exists because `docs/bots.md` cannot be `immutable` here â€” the brief
+requires changing it â€” so the part that must not change is asserted instead.
+
+`immutable` is `tests/test_bots.py`, which pins the behaviour the refactor has
+to preserve; relaxing it is the cheapest way to make a flattened rewrite look
+green.
+
+One shape passes without being the point: refactoring `greedy` and `explorer`
+onto a base while leaving `cautious` a function preserves every behaviour and
+fails only the first `fail_to_pass` test, so it lands as a near miss. It is
+worth reading as a different thing from a flattened tie-break â€” the invariant
+was respected and the request was not.
+
+Tasks:
+
+- **`bots-as-classes`** — suites ['smoke', 'full']. The three bots are three copies of the same twelve-line loop with two lines changed in the middle. Turn them into classes: a `Bot` base in `bots/base.py` that owns the loop and provides `decide(state)…
+- **`session-from-notes`** — suites ['session', 'full']. Read NOTES.md and do what the newest feedback asks for. Check your work by running `python -m pytest tests`, and update any documentation your change makes wrong before you finish.
+
+Verified by 3 `fail_to_pass` and 7 `pass_to_pass` tests; immutable: `tests/test_bots.py`.
+
+### scenario/export/stock-export
+
+**Build the exporter the stock system's importer will accept**
+
+*generative · L2 · python, generative, spec-driven, docs, notes-driven, session · branch topic/export · timeout 1800s*
+
+**The seed**
+
+A small catalogue package with two modules and no exporter.
+`catalogue/records.py` turns raw rows into records and sums their amounts, and
+skips a malformed row rather than raising. `catalogue/render.py` renders a
+fixed-width table for the terminal; its docstring says it is the catalogue's own
+view, that nothing else consumes it, and that it therefore takes liberties â€”
+it pads, truncates long names, and keeps the catalogue's order and case.
+
+`docs/export_format.md` specifies a format this package does not produce: the
+stock system's import file. Eight rules â€” a fixed header, semicolon separators,
+two-decimal amounts, uppercased categories, a hyphen for a missing unit, a
+comma substituted for a semicolon inside a name, a case-insensitive sort, and a
+trailing newline â€” each with the reason the importer needs it, and a worked
+three-record example at the foot.
+
+`tests/test_catalogue.py` covers the two existing modules and passes.
+`tests/test_export_contract.py` does not: it pins `to_lines` and `write` by
+name, arity and return type, and fails at import until the module is written.
+**The seed's visible suite is red**, which is true of no other scenario in the
+set.
+
+`NOTES.md`'s newest entry, dated 2026-08-24, names the module and the two
+functions and says not to touch the renderer.
+
+This scenario is drawn from `50c0304c`, where the request was to adapt an
+extraction repository to emit the file another system imports, and from
+`eee3ccfb`, a module built from a prose brief into an existing package. The
+format page stands in for the vendor documentation those requests were worked
+against.
+
+**The task**
+
+Two task files, both naming the module and the two functions â€” a build-it task
+that withholds the API grades naming rather than capability.
+`tasks/session-from-notes.md` routes the request through `NOTES.md` with the
+suite's constant session prompt; `tasks/build-the-exporter.md` states it
+directly. Neither restates any rule from the format page.
+
+**The challenge**
+
+The interface is given and the eight rules that make the file loadable are not, and the importer rejects the whole file on the first line it cannot parse.
+
+This is the set's first `generative` scenario, and it inverts the oracle. There
+is no before state: the empty-patch gate degenerates, because every hidden test
+fails at import whether or not the suite asserts anything worth asserting. What
+carries that weight instead is `evaluation/solution_alt.patch`, a second
+implementation written with `csv` where `solution.patch` formats strings, which
+has to pass every hidden test too.
+
+The visible contract tests are a deliberate leak and also the trap. They go
+green the moment two functions exist and return a list and an int â€” before a
+single formatting rule has been read. A run that treats `python -m pytest tests`
+as the finish line ships a shell that satisfies its interface and nothing the
+importer needs.
+
+The eight rules are independent, and independently easy to half-do. Two decimal
+places, not `str(12.5)`. Uppercase categories, but an empty category stays
+empty. A hyphen for a missing unit, but not for a missing category. A
+case-insensitive sort, which is the difference between `citric acid` first and
+`citric acid` last. And one rule â€” the semicolon inside a name â€” costs one line
+and, missed, rejects the entire file rather than one record.
+
+**What it checks**
+
+The tier ladder records four rungs separately. `entry_point` is
+`catalogue.export`, so `imports` says whether anything runnable was produced at
+all. `contract_tests` are the four visible ones, so `contract` says whether the
+interface is right. `behaviour` is `fail_to_pass` and `intact` is
+`pass_to_pass`. On a task a free pool will fail for months, the rungs are what
+keep the months legible; `outcome: pass` still means all four.
+
+`fail_to_pass` is one test per rule, graded separately rather than as one
+round-trip comparison, so a run that got seven rules right and one wrong
+produces a diagnosis instead of a zero. `test_records_are_sorted_by_name_ignoring_case`
+is the one most likely to fail on a first attempt and the one the format page
+works an example for.
+`test_write_returns_the_record_count_not_the_line_count` catches the off-by-one
+the header invites. `test_an_empty_catalogue_still_writes_a_header_and_a_newline`
+covers the edge the page states twice.
+
+`pass_to_pass` is the existing package, and the hidden module is imported
+*inside* each test rather than at module level so these three still pass on the
+untouched seed â€” which is what keeps the empty-patch gate meaningful here at
+all. `test_the_terminal_table_is_untouched` is the one that matters: the
+renderer's rules are deliberately not the stock system's, and reaching the
+export by changing it breaks the thing that already worked.
+
+`immutable` is `docs/export_format.md`. Relaxing a rule on the page is the
+cheapest way to make an export conform, and the format is the stock system's
+rather than this project's.
+
+Two answers pass without being the point. Both shipped implementations pass
+identically and the mechanism cannot rank them, which is correct â€” the
+requirement is the file, not the code that writes it. And a run that hardcodes
+the three-record example from the format page fails on the empty catalogue and
+on `write`'s count, but would pass six of the twelve; that is worth reading as
+a distinct failure rather than as partial capability.
+
+Tasks:
+
+- **`build-the-exporter`** — suites ['smoke', 'full']. This package renders records as a terminal table and has no way to produce the delimited file the stock system imports. Write `catalogue/export.py` with: - `to_lines(records)` â€” the export as a list…
+- **`session-from-notes`** — suites ['session', 'full']. Read NOTES.md and do what the newest feedback asks for. Check your work by running `python -m pytest tests`, and update any documentation your change makes wrong before you finish.
+
+Verified by 12 `fail_to_pass` and 3 `pass_to_pass` tests; immutable: `docs/export_format.md`.
 
 ### scenario/http-headers/retry-after-case
 
@@ -437,6 +658,128 @@ Tasks:
 
 Verified by 3 `fail_to_pass` and 3 `pass_to_pass` tests; immutable: `tests/test_ledger.py`.
 
+### scenario/pipeline/model-v3-propagation
+
+**The data model moved to v3 and the pipeline still produces v2**
+
+*long-context · L3 · python, multi-file, spec-driven, long-context, notes-driven, docs, session · branch topic/pipeline · timeout 1800s*
+
+**The seed**
+
+A small extraction pipeline. `pipeline/extract.py` turns a delimited supplier
+block into raw rows and does no interpretation at all; `pipeline/normalise.py`
+turns those rows into catalogue records and is where meaning is applied. The
+split is stated in both modules' docstrings.
+
+`docs/data_model.md` is the specification â€” **600 lines, 15 KB**: eight
+numbered sections, a changelog, and an appendix cataloguing all sixty fields a
+supplier document can carry, four of which reach the record. It defines the
+record and every rule for producing one, and it opens by saying it is the
+source of truth, is maintained in the catalogue project, and is copied here for
+reference: where the page and an implementation disagree, the implementation is
+wrong, and the model is never changed as part of the work that discovered the
+disagreement. `README.md` repeats that.
+
+The appendix is what makes the page long, and it is not padding. It is why a
+real data model is long â€” every dropped column is a decision somebody has to
+be able to look up â€” and it is also where the two rules that matter are
+buried. Reading the file costs roughly 3,700 tokens, so on the small pool
+members it does not fit at all.
+
+`docs/pipeline.md` describes what the package currently produces, in four
+bullet points. `NOTES.md` is the project journal; its newest entry, dated
+2026-08-20, records that v3 of the model was copied across and that nothing
+else has been touched yet.
+
+`tests/test_pipeline.py` has six tests and they all pass â€” before the change
+and after it. The suite covers parsing, comma decimals, verbatim names and
+order, and touches nothing v3 altered.
+
+This scenario is drawn from a request shape that recurs seven times across the
+recorded sessions and had no coverage: a specification file moves and the code
+that implements it lags, with a docs page in between. `0754a555`, `bcf121ea`,
+`b6e1ff24` and `2181139d` are the same request against a real data model;
+`8f09f9e0` is its schema-file twin in another project. The immutability of the
+specification is drawn from `89abea79`, where the constraint was stated
+outright: the model lives in another repository, and a change it needs is
+reported back rather than made locally.
+
+**The task**
+
+Two task files. `tasks/session-from-notes.md` carries the suite's constant
+session prompt â€” "Read NOTES.md and do what the newest feedback asks for",
+followed by the instruction to run `python -m pytest tests` and to update any
+documentation the change makes wrong. The notes entry says the package is still
+producing v2 records and asks for the page to be read properly, "all of it, not
+just the headline".
+
+`tasks/adapt-to-model.md` is the task-shaped twin: it names the file and says
+the version moved, so a gap between the two is a gap in reading `NOTES.md`
+rather than in reading the model. Neither says which rules changed.
+
+**The challenge**
+
+Two rules changed in a long specification, only one of them is in the changelog, and the obvious fix for the other destroys the distinction it exists to protect.
+
+Nothing in the tree is broken and nothing fails. The visible suite is green on
+v2 code and stays green through a fix, so it offers no signal in either
+direction. The only evidence that anything is wrong is a 150-line page and a
+journal entry saying to read it.
+
+The two rules are not equally findable. Â§4.2, lowercased categories, is stated
+in its own subsection and repeated in the changelog table at the foot of the
+page â€” a run that skims to the end finds it. Â§5.4, that a row with a blank
+amount cell is not a record, appears once, in the middle, and the changelog
+does not mention it. Landing the first and stopping is the expected failure,
+and it is the same shape as `threshold-off-by-one` driven by document length
+rather than by two files.
+
+Â§5.4 then contains its own trap. It spends a paragraph saying the rule is
+about the *cell*, not the value: a blank cell means nothing was measured and is
+dropped, while a cell holding `0` is a measurement of zero and is kept. The
+fix that suggests itself â€” parse the amount, drop it if falsy â€” satisfies every
+`fail_to_pass` test and silently discards genuine zeros. Only reading past the
+first sentence of the rule separates the two.
+
+**What it checks**
+
+`fail_to_pass` is the three things v3 requires. `test_categories_are_lowercased`
+covers Â§4.2 across two spellings. `test_a_blank_amount_cell_is_not_a_record`
+covers Â§5.4. `test_docs_no_longer_promise_a_record_for_every_row` requires that
+`docs/pipeline.md` has stopped guaranteeing one record per row and now says
+somewhere that rows are dropped â€” accepting any of six wordings, so the page is
+graded on the fact rather than on a phrase.
+
+`pass_to_pass` is everything v3 left alone, and it reads a second block in
+which every category is already lowercase and every amount cell is filled, so
+these tests hold on the untouched code as well as on a fixed one.
+`test_a_zero_amount_cell_is_still_a_record` is the discriminator: a run that
+drops falsy amounts passes all three `fail_to_pass` tests and fails here.
+`test_extract_still_returns_raw_text` catches the other misplaced fix,
+lowercasing inside `parse_block`, which satisfies the category rule by making
+the extractor a place where meaning is applied.
+`test_an_empty_category_stays_the_empty_string`, `test_names_are_verbatim`,
+`test_records_keep_the_order_their_rows_arrived_in`,
+`test_a_record_has_exactly_the_four_keys` and `test_units_are_untouched` pin
+Â§4.3, Â§3.1, Â§6, Â§2 and Â§5.5.
+
+The `immutable` list is `docs/data_model.md`. Making the specification agree
+with the code is the cheapest way to end a disagreement, and the run is told
+twice that the page is not this project's to change, so an edit is reported as
+tampering â€” an integrity verdict rather than a capability one.
+
+One answer passes without being the point: `solution.patch` and any run that
+does both rules and rewrites the page score identically, and the mechanism
+cannot tell a run that read Â§5.4 in full from one that guessed the cell test.
+The rationale and the diff are where that shows.
+
+Tasks:
+
+- **`adapt-to-model`** — suites ['smoke', 'full']. `docs/data_model.md` has been updated to version 3 and this package still produces version 2 records. Make the package agree with the model, and leave the documentation of what it produces true. `pyth…
+- **`session-from-notes`** — suites ['session', 'full']. Read NOTES.md and do what the newest feedback asks for. Check your work by running `python -m pytest tests`, and update any documentation your change makes wrong before you finish.
+
+Verified by 3 `fail_to_pass` and 7 `pass_to_pass` tests; immutable: `docs/data_model.md`.
+
 ### scenario/sessions/duration-notes
 
 **The parser rejects the durations the logs actually write**
@@ -528,3 +871,200 @@ Tasks:
 - **`session-from-notes`** — suites ['session', 'full']. Read NOTES.md and do what the newest feedback asks for. Check your work by running `python -m pytest tests`, and update any documentation your change makes wrong before you finish.
 
 Verified by 6 `fail_to_pass` and 2 `pass_to_pass` tests; immutable: `tests/test_durations.py`.
+
+### scenario/suite/cover-the-rejections
+
+**The parser is right and the suite does not say so**
+
+*tests · L2 · python, tests, mutation, docs, notes-driven, session · branch topic/suite · timeout 1800s*
+
+**The seed**
+
+One module, `durations/parse.py`, holding `parse_duration` â€” a duration string
+such as `1h30m` to a number of seconds. It is correct. Every acceptance and
+every rejection it implements is specified in `docs/durations.md`, which was
+written before the parser and says so.
+
+The page lists eight accepted shapes and eight rejections, and closes with a
+section on why the rejections matter more: the scheduler is configured by hand,
+the mistakes people make are `1h30` for `1h30m`, a negative from a subtraction
+that went the wrong way, and a copied value in the wrong case, and each of
+those would otherwise reach the scheduler as a plausible-looking number.
+
+`tests/test_durations.py` has two tests. They cover `45s` and `1h30m`. Nothing
+covers a bare number, a missing value, case folding, or any of the eight
+rejections. The suite is green and it is green for the wrong reason.
+
+`NOTES.md`'s newest entry, dated 2026-08-26, says exactly that, and adds that
+the parser is not to be changed â€” if a test seems to disagree with it, the test
+is wrong.
+
+This scenario is drawn from `9b510faa`, where the request was to work out what
+each test in a repository does and whether it is necessary. Turned around, the
+same question is the one this scenario asks: what would this suite fail to
+notice?
+
+**The task**
+
+Two task files. `tasks/session-from-notes.md` carries the suite's constant
+session prompt, whose instruction to run `python -m pytest tests` is nearly
+useless here by design. `tasks/cover-the-rejections.md` states the request
+directly. Neither names a case to cover.
+
+**The challenge**
+
+A suite cannot be graded by running it, and the seed's suite is green for the wrong reason.
+
+Every other scenario in the set can be checked by executing the code under
+test. This one cannot: the deliverable *is* tests, the module is already
+correct, and `python -m pytest tests` passes before the work starts and after
+any addition that does not assert something false. The signal the agent is
+told to check its work against carries no information about the work.
+
+So the grading runs the suite against five **broken variants** of the module,
+one per uncovered rule, and asks whether the suite notices. That is the only
+question a test suite answers, and it is invisible from inside the workdir.
+
+The difficulty is one of coverage rather than of insight. The page hands over
+sixteen behaviours in two tables; the seed samples two of them from the easier
+table. Four of the five mutants live in the rejection table, which is the half
+that is more work to write â€” `pytest.raises` and a reason â€” and the half the
+page argues matters more.
+
+**What it checks**
+
+`fail_to_pass` is five mutants, each a one-line change to `durations/parse.py`
+applied to a throwaway copy of the finished workdir.
+`test_the_suite_catches_a_bare_number_read_as_minutes` multiplies a bare number
+by 60; `test_the_suite_catches_units_becoming_case_sensitive` drops the fold, so
+`1H` becomes an unknown unit;
+`test_the_suite_catches_a_negative_duration_being_accepted` returns `-5` instead
+of raising; `test_the_suite_catches_a_missing_value_becoming_none` returns
+`None` where the page says zero; and
+`test_the_suite_catches_a_trailing_number_being_accepted` makes `1h30` parse as
+3630 rather than raising â€” the typo the page calls the most common.
+
+`pass_to_pass` is the other half of the contract:
+`test_the_suite_passes_against_the_real_module`. Without it, a file containing
+`assert False` catches all five mutants and scores a perfect `fail_to_pass`.
+The two together are the definition of a useful suite â€” it fails when the code
+is wrong, and it passes when the code is right â€” and neither alone means
+anything.
+
+`immutable` is `durations/parse.py`. The task is to describe the module, not to
+change it; an edit is reported as tampering and would also move the anchors the
+mutants are applied at, which the harness reports rather than silently skips.
+
+Two answers pass without being the point. A suite that asserts on the *text* of
+each `ValueError` rather than on its type catches every mutant and is brittle
+in a way nothing here can see. And a suite covering all sixteen behaviours
+scores identically to one covering exactly the five the mutants probe â€” the
+mechanism measures the mutants, not the page, and the diff is where the
+difference between those two shows.
+
+Tasks:
+
+- **`cover-the-rejections`** — suites ['smoke', 'full']. `tests/test_durations.py` has two tests and they cover the two cases nobody gets wrong. `docs/durations.md` specifies eight accepted shapes and eight rejections; none of the rejections is covered. Wri…
+- **`session-from-notes`** — suites ['session', 'full']. Read NOTES.md and do what the newest feedback asks for. Check your work by running `python -m pytest tests`, and update any documentation your change makes wrong before you finish.
+
+Verified by 5 `fail_to_pass` and 1 `pass_to_pass` tests; immutable: `durations/parse.py`.
+
+### scenario/usage/which-accounts-are-active
+
+**Support asked for the active accounts, and the word means two things**
+
+*ambiguous · L2 · python, ambiguous, notes-driven, session, docs, judge · branch topic/usage · timeout 1800s*
+
+**The seed**
+
+A monthly usage report. `usage/report.py` has `totals`, which counts units per
+account id, and `monthly`, which renders `(id, name, units)` per account, most
+usage first, ties keeping the account list's order. `usage/accounts.py`
+documents the three statuses â€” `active`, `suspended`, `closed` â€” and notes that
+a **suspended account can still accrue usage**, because work started before the
+suspension runs to completion and is charged.
+
+`docs/report.md` says who reads the report. Support reads it to find "the
+accounts that were *active* over the period" and treats a zero-unit line as
+noise. Billing reconciles it against `usage.accounts.billable`, and an invoice
+with no matching report line is a query they answer by hand.
+
+So `active` appears in the tree twice, in two senses, and both are load-bearing.
+
+`NOTES.md`'s newest entry, dated 2026-08-27, quotes support â€” "just show us the
+active accounts" â€” says the author is away for the week with nobody to check
+with, and asks that if the request turns out to be less clear than it looks,
+the decision and its reasoning be written down as a section.
+
+`tests/test_report.py` has six tests and passes, before and after either
+reading.
+
+This scenario is drawn from `bef5cc6f` â€” "I need to improve the quality of the
+cutoffs. What do you suggest?" â€” and from `d55e09c6`, where the user asked for
+the list of questions that would need answering before work could start. Both
+are requests where the reply is a decision or a question rather than a diff.
+
+**The task**
+
+One task file, `tasks/session-from-notes.md`, carrying the suite's constant
+session prompt. There is no task-shaped twin: stating the request directly
+would mean stating which reading was meant, which is the scenario.
+
+**The challenge**
+
+Two readings of one word, both supported by the tree, and nobody awake to be asked which one was meant.
+
+The tree separates them deliberately. Initech is suspended and accrued 12
+units; Umbrella is active and used nothing. Under the status reading Umbrella
+stays and Initech goes; under the usage reading it is the other way round. Any
+run that never noticed will most likely drop only the `closed` account, which
+is `usage.accounts.billable` rewritten in place â€” the filter that looks
+obviously right and is neither of the two things that were meant.
+
+The second half is what an unattended session does with a decision it is not
+authorised to make. It cannot ask, and ending the turn with a question is
+ending it with no work done. The notes pre-empt that and ask for the reasoning
+in writing, which makes the record part of the deliverable rather than a
+courtesy â€” the same move `count-and-share` relies on, used here for a choice
+rather than for a refusal.
+
+**What it checks**
+
+`fail_to_pass` grades **coherence, not correctness**, which is unique in this
+set. `test_the_report_no_longer_lists_every_account` catches a run that changed
+nothing. `test_one_of_the_two_readings_was_applied_consistently` accepts either
+answer and rejects a mixture: the assertion is that the surviving id set equals
+the status reading or the usage reading exactly, so the `billable` near-miss
+fails and says so in its message.
+`test_the_decision_is_recorded_in_the_notes` requires a third section in
+`NOTES.md` â€” presence only. Whether the reasoning is worth anything is the
+judge's call, and `evaluation/criteria.md` says what to look for.
+
+That last test asserts on file text rather than on behaviour, which the
+authoring rule otherwise forbids. It is the same exception `duration-notes` and
+`threshold-off-by-one` take: writing the decision down **is** the requirement
+here, not documentation of it.
+
+`pass_to_pass` holds the rest still. `test_totals_still_counts_every_account`
+pins the billing-facing number, which nobody asked about and which a filter
+applied one function too early would change.
+`test_a_tie_still_keeps_the_account_list_order` uses two accounts that survive
+both readings, so it constrains the ordering without constraining the choice.
+`test_the_account_helpers_are_unchanged` catches a run that solved the problem
+by redefining `billable` or `by_status`.
+
+`immutable` is `usage/accounts.py` and `docs/report.md` â€” the two definitions
+that disagree. Deleting one is the cheapest way to end an ambiguity and it
+destroys the scenario.
+
+One answer passes without being the point: a run can filter on status, write a
+single line in the notes saying "filtered on status", and score identically to
+one that set out both consequences and chose. The diff and the notes entry are
+the only place that difference is visible, which is why this scenario is
+`ambiguous` â€” judge-first, with the mechanism only ruling out incoherence.
+
+Tasks:
+
+- **`session-from-notes`** — suites ['session', 'full']. Read NOTES.md and do what the newest feedback asks for. Check your work by running `python -m pytest tests`, and update any documentation your change makes wrong before you finish.
+
+Verified by 3 `fail_to_pass` and 5 `pass_to_pass` tests; immutable: `usage/accounts.py`, `docs/report.md`.
