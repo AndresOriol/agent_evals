@@ -13,7 +13,7 @@ traces — stays local, and each row names the `run_id` that holds it.
 because that is what the run records say.
 
 
-**69 runs across 23 agent versions.**
+**78 runs across 24 agent versions.**
 
 ## Agent versions
 
@@ -22,6 +22,7 @@ because that is what the run records say.
 | `adhoc-harness` | `59f26fec` | 6 | 3/6 | 19%–81% | 9,640 | 11.7 | 3.3 | reasoning=1, stopping=2 |
 | `adhoc-harness` | `b861e11a` | 3 | 2/3 | 21%–94% | 17,746 | 20.3 | 5.7 | reasoning=1 |
 | `baseline` | `a9e8c741` | 6 | 6/6 | 61%–100% | 195,368 | 16.2 | 4.5 | — |
+| `code` | `4d5cad0e` | 9 | 3/9 | 12%–65% | 600,177 | 25.0 | 8.3 | — |
 | `context-and-gate` | `25e89ea9` | 2 | 0/2 | 0%–66% | 136,700 | 51.0 | 17.5 | — |
 | `context-and-gate` | `4c24a546` | 3 | 1/3 | 6%–79% | 183,637 | 80.3 | 29.3 | stopping=2 |
 | `context-and-gate` | `710447ea` | 4 | 1/4 | 5%–70% | 158,960 | 74.2 | 34.5 | — |
@@ -51,13 +52,18 @@ Which scenarios still separate one version from another. A row every version pas
 
 | Scenario / task | runs | pass | versions | `tokens_in` mean |
 | --- | --- | --- | --- | --- |
+| `bots-to-base-class` / `session-from-notes` | 1 | 0/1 | 1 | 1,325,314 |
 | `count-and-share` / `count-and-share` | 6 | 1/6 | 5 | 171,119 |
-| `count-and-share` / `session-from-notes` | 8 | 0/8 | 7 | 93,092 |
-| `duration-notes` / `session-from-notes` | 2 | 1/2 | 1 | 92,175 |
+| `count-and-share` / `session-from-notes` | 9 | 0/9 | 8 | 140,247 |
+| `cover-the-rejections` / `session-from-notes` | 1 | 1/1 | 1 | 313,388 |
+| `duration-notes` / `session-from-notes` | 3 | 1/3 | 2 | 209,085 |
+| `model-v3-propagation` / `session-from-notes` | 1 | 1/1 | 1 | 689,176 |
 | `retry-after-case` / `fix-from-failing-test` | 39 | 24/39 | 12 | 39,625 |
-| `stale-categories` / `session-from-notes` | 2 | 2/2 | 2 | 96,281 |
+| `stale-categories` / `session-from-notes` | 3 | 2/3 | 3 | 199,727 |
 | `stale-categories` / `stale-categories` | 1 | 1/1 | 1 | 128,314 |
-| `threshold-off-by-one` / `session-from-notes` | 11 | 1/11 | 8 | 81,303 |
+| `stock-export` / `session-from-notes` | 1 | 1/1 | 1 | 604,334 |
+| `threshold-off-by-one` / `session-from-notes` | 12 | 1/12 | 9 | 114,593 |
+| `which-accounts-are-active` / `session-from-notes` | 1 | 0/1 | 1 | 621,584 |
 
 ## Every run
 
@@ -69,6 +75,15 @@ Chronological. The evidence for each is in `evals/results/runs/<run_id>/` on the
 | `20260826T205415Z_retry-after-case_fix-from-failing-test_stub-fix_r1` | `retry-after-case` / `fix-from-failing-test` | `stub-fix` @ `9e891502` | pass | — | 912 |
 | `20260826T211342Z_retry-after-case_fix-from-failing-test_stub-fix_r1` | `retry-after-case` / `fix-from-failing-test` | `stub-fix` @ `9e891502` | pass | — | 912 |
 | `20260826T211546Z_retry-after-case_fix-from-failing-test_stub-fix_r1` | `retry-after-case` / `fix-from-failing-test` | `stub-fix` @ `9e891502` | pass | — | 912 |
+| `20260905T151013Z_threshold-off-by-one_session-from-notes_code_r1` | `threshold-off-by-one` / `session-from-notes` | `code` @ `4d5cad0e` | tampered | — | 480,784 |
+| `20260905T151122Z_bots-to-base-class_session-from-notes_code_r1` | `bots-to-base-class` / `session-from-notes` | `code` @ `4d5cad0e` | tampered | — | 1,325,314 |
+| `20260905T151400Z_stock-export_session-from-notes_code_r1` | `stock-export` / `session-from-notes` | `code` @ `4d5cad0e` | pass | — | 604,334 |
+| `20260905T151640Z_count-and-share_session-from-notes_code_r1` | `count-and-share` / `session-from-notes` | `code` @ `4d5cad0e` | tampered | — | 517,492 |
+| `20260905T151750Z_stale-categories_session-from-notes_code_r1` | `stale-categories` / `session-from-notes` | `code` @ `4d5cad0e` | tampered | — | 406,618 |
+| `20260905T151855Z_model-v3-propagation_session-from-notes_code_r1` | `model-v3-propagation` / `session-from-notes` | `code` @ `4d5cad0e` | pass | — | 689,176 |
+| `20260905T152026Z_duration-notes_session-from-notes_code_r1` | `duration-notes` / `session-from-notes` | `code` @ `4d5cad0e` | tampered | — | 442,904 |
+| `20260905T152144Z_cover-the-rejections_session-from-notes_code_r1` | `cover-the-rejections` / `session-from-notes` | `code` @ `4d5cad0e` | pass | — | 313,388 |
+| `20260905T152245Z_which-accounts-are-active_session-from-notes_code_r1` | `which-accounts-are-active` / `session-from-notes` | `code` @ `4d5cad0e` | tampered | — | 621,584 |
 | `count-and-share_count-and-share_context-and-gate_r1_20260820T210951Z` | `count-and-share` / `count-and-share` | `context-and-gate` @ `25e89ea9` | tampered | — | 149,802 |
 | `count-and-share_count-and-share_context-and-gate_r1_20260820T212037Z` | `count-and-share` / `count-and-share` | `context-and-gate` @ `c2178cd2` | crash | stopping | 118,764 |
 | `count-and-share_count-and-share_context-and-gate_r1_20260820T213255Z` | `count-and-share` / `count-and-share` | `context-and-gate` @ `710447ea` | tampered | — | 385,018 |
