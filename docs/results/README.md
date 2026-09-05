@@ -17,36 +17,38 @@ because that is what the run records say.
 
 ## Agent versions
 
-| Configuration | commit | runs | solved | 95% interval | integrity | `tokens_in` mean | tok/call | calls | bounces | failure classes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `adhoc-harness` | `59f26fec` | 6 | 3/6 | 19%–81% | clean | 9,640 | 0 | 11.7 | 3.3 | reasoning=1, stopping=2 |
-| `adhoc-harness` | `b861e11a` | 3 | 2/3 | 21%–94% | clean | 17,746 | 0 | 20.3 | 5.7 | reasoning=1 |
-| `baseline` | `a9e8c741` | 6 | 6/6 | 61%–100% | clean | 195,368 | 0 | 16.2 | 4.5 | — |
-| `code` | `4d5cad0e` | 10 | 7/10 | 40%–89% | 6 flagged by the previous oracle | 598,995 | 0 | 25.6 | 8.8 | reasoning=1 |
-| `context-and-gate` | `25e89ea9` | 2 | 0/2 | 0%–66% | 2 flagged by the previous oracle | 136,700 | 0 | 51.0 | 17.5 | — |
-| `context-and-gate` | `4c24a546` | 3 | 2/3 | 21%–94% | clean | 183,637 | 0 | 80.3 | 29.3 | stopping=2 |
-| `context-and-gate` | `710447ea` | 4 | 3/4 | 30%–95% | 3 flagged by the previous oracle | 158,960 | 0 | 74.2 | 34.5 | — |
-| `context-and-gate` | `c2178cd2` | 2 | 0/2 | 0%–66% | clean | 84,037 | 0 | 41.5 | 18.5 | stopping=2 |
-| `deepagents` | `2dd3285f` | 1 | 1/1 | 21%–100% | 1 flagged by the previous oracle | 0 (1 untraced) | 0 | 0.0 | 0.0 | — |
-| `deepagents` | `614bbc8d` | 2 | 0/2 | 0%–66% | clean | 0 (2 untraced) | 0 | 0.0 | 0.0 | stopping=2 |
-| `deepagents` | `78713af4` | 1 | 1/1 | 21%–100% | 1 flagged by the previous oracle | 0 (1 untraced) | 0 | 0.0 | 0.0 | — |
-| `deepagents` | `8432dcf0` | 1 | 1/1 | 21%–100% | 1 flagged by the previous oracle | 0 (1 untraced) | 0 | 0.0 | 0.0 | — |
-| `harness-v2-seeded` | `b861e11a` | 3 | 0/3 | 0%–56% | clean | 13,755 | 0 | 15.7 | 4.0 | reasoning=2, stopping=1 |
-| `harness-v3-merged` | `83298cad` | 3 | 1/3 | 6%–79% | clean | 8,325 | 0 | 10.7 | 4.0 | reasoning=2 |
-| `harness-v3-merged` | `b861e11a` | 3 | 3/3 | 44%–100% | clean | 12,674 | 0 | 15.0 | 5.3 | — |
-| `harness-v5-lean` | `b861e11a` | 3 | 1/3 | 6%–79% | clean | 12,827 | 0 | 15.0 | 4.7 | reasoning=2 |
-| `harness-v6-guarded` | `83298cad` | 3 | 2/3 | 21%–94% | clean | 5,756 | 0 | 7.3 | 2.0 | reasoning=1 |
-| `harness-v7-orchestrated` | `83298cad` | 3 | 0/3 | 0%–56% | clean | 12,543 | 0 | 19.7 | 7.3 | reasoning=3 |
-| `harness-v8-session` | `8311b5bb` | 4 | 2/4 | 15%–85% | clean | 115,478 | 0 | 54.2 | 10.8 | reasoning=1, stopping=1 |
-| `harness-v8-session` | `b19be944` | 1 | 0/1 | 0%–79% | clean | 167,290 | 0 | 70.0 | 12.0 | reasoning=1 |
-| `harness-v8-session` | `b80fd82d` | 1 | 0/1 | 0%–79% | clean | 1,076 | 0 | 2.0 | 2.0 | stopping=1 |
-| `session` | `c1a0e918` | 2 | 0/2 | 0%–66% | clean | 79,357 | 0 | 45.5 | 14.5 | reasoning=1, stopping=1 |
-| `session` | `d48215d8` | 8 | 4/8 | 22%–78% | 1 flagged by the previous oracle | 101,825 | 0 | 65.4 | 22.5 | reasoning=2, stopping=1 |
-| `stub-fix` | `9e891502` | 4 | 4/4 | 51%–100% | clean | 912 | 0 | 2.0 | 1.0 | — |
+| Configuration | commit | runs | solved | 95% interval | integrity | `tokens_in` mean | tok/call | calls | bounces | account | failure classes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `adhoc-harness` | `59f26fec` | 6 | 3/6 | 19%–81% | clean | 9,640 | 0 | 11.7 | 3.3 | — | reasoning=1, stopping=2 |
+| `adhoc-harness` | `b861e11a` | 3 | 2/3 | 21%–94% | clean | 17,746 | 0 | 20.3 | 5.7 | — | reasoning=1 |
+| `baseline` | `a9e8c741` | 6 | 6/6 | 61%–100% | clean | 195,368 | 0 | 16.2 | 4.5 | — | — |
+| `code` | `4d5cad0e` | 10 | 7/10 | 40%–89% | 6 flagged by the previous oracle | 598,995 | 0 | 25.6 | 8.8 | — | reasoning=1 |
+| `context-and-gate` | `25e89ea9` | 2 | 0/2 | 0%–66% | 2 flagged by the previous oracle | 136,700 | 0 | 51.0 | 17.5 | — | — |
+| `context-and-gate` | `4c24a546` | 3 | 2/3 | 21%–94% | clean | 183,637 | 0 | 80.3 | 29.3 | — | stopping=2 |
+| `context-and-gate` | `710447ea` | 4 | 3/4 | 30%–95% | 3 flagged by the previous oracle | 158,960 | 0 | 74.2 | 34.5 | — | — |
+| `context-and-gate` | `c2178cd2` | 2 | 0/2 | 0%–66% | clean | 84,037 | 0 | 41.5 | 18.5 | — | stopping=2 |
+| `deepagents` | `2dd3285f` | 1 | 1/1 | 21%–100% | 1 flagged by the previous oracle | 0 (1 untraced) | 0 | 0.0 | 0.0 | — | — |
+| `deepagents` | `614bbc8d` | 2 | 0/2 | 0%–66% | clean | 0 (2 untraced) | 0 | 0.0 | 0.0 | — | stopping=2 |
+| `deepagents` | `78713af4` | 1 | 1/1 | 21%–100% | 1 flagged by the previous oracle | 0 (1 untraced) | 0 | 0.0 | 0.0 | — | — |
+| `deepagents` | `8432dcf0` | 1 | 1/1 | 21%–100% | 1 flagged by the previous oracle | 0 (1 untraced) | 0 | 0.0 | 0.0 | — | — |
+| `harness-v2-seeded` | `b861e11a` | 3 | 0/3 | 0%–56% | clean | 13,755 | 0 | 15.7 | 4.0 | — | reasoning=2, stopping=1 |
+| `harness-v3-merged` | `83298cad` | 3 | 1/3 | 6%–79% | clean | 8,325 | 0 | 10.7 | 4.0 | — | reasoning=2 |
+| `harness-v3-merged` | `b861e11a` | 3 | 3/3 | 44%–100% | clean | 12,674 | 0 | 15.0 | 5.3 | — | — |
+| `harness-v5-lean` | `b861e11a` | 3 | 1/3 | 6%–79% | clean | 12,827 | 0 | 15.0 | 4.7 | — | reasoning=2 |
+| `harness-v6-guarded` | `83298cad` | 3 | 2/3 | 21%–94% | clean | 5,756 | 0 | 7.3 | 2.0 | — | reasoning=1 |
+| `harness-v7-orchestrated` | `83298cad` | 3 | 0/3 | 0%–56% | clean | 12,543 | 0 | 19.7 | 7.3 | — | reasoning=3 |
+| `harness-v8-session` | `8311b5bb` | 4 | 2/4 | 15%–85% | clean | 115,478 | 0 | 54.2 | 10.8 | — | reasoning=1, stopping=1 |
+| `harness-v8-session` | `b19be944` | 1 | 0/1 | 0%–79% | clean | 167,290 | 0 | 70.0 | 12.0 | — | reasoning=1 |
+| `harness-v8-session` | `b80fd82d` | 1 | 0/1 | 0%–79% | clean | 1,076 | 0 | 2.0 | 2.0 | — | stopping=1 |
+| `session` | `c1a0e918` | 2 | 0/2 | 0%–66% | clean | 79,357 | 0 | 45.5 | 14.5 | — | reasoning=1, stopping=1 |
+| `session` | `d48215d8` | 8 | 4/8 | 22%–78% | 1 flagged by the previous oracle | 101,825 | 0 | 65.4 | 22.5 | — | reasoning=2, stopping=1 |
+| `stub-fix` | `9e891502` | 4 | 4/4 | 51%–100% | clean | 912 | 0 | 2.0 | 1.0 | — | — |
 
 **solved** is `verified`: every `fail_to_pass` test flipped and every `pass_to_pass` test still passing. **integrity** is the separate question of whether the run respected what it was told not to touch, and it is deliberately not a point on the same scale — a version that solves nothing and a version that solves everything by rewriting the tests are both bad, in ways no single rate can hold. A weakening still makes the run's `outcome` `tampered`; this table refuses to average that into a pass rate.
 
 Runs recorded before the integrity oracle changed are marked *by the previous oracle*: that oracle hashed the file, so it could not tell appending a regression test from deleting an assertion and called both tampering. Their integrity verdicts are not comparable with the ones below them, and are not counted with them.
+
+**account** is how often the run appended to the project's `NOTES.md`, over the runs whose scenario ships one. [R7](../../docs/design/long-run-harness.md) calls that file "the whole human interface", and it is the only part of an account that can be checked without reading it. Nothing gates on this yet — it is here to establish a baseline.
 
 A mean marked *untraced* was taken over fewer runs than the row counts. A run whose `trace.jsonl` never arrived records zero for everything summed over it, and averaging that in reports a cost of nothing as though it had been measured.
 
