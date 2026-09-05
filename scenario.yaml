@@ -1,0 +1,47 @@
+id: stock-export
+title: Build the exporter the stock system's importer will accept
+category: generative
+difficulty: L2
+tags: [python, generative, spec-driven, docs, notes-driven, session]
+context_mode: none
+timeout_s: 1800
+
+# The tier ladder (design/generative-scenarios.md 3.2). `entry_point` is the
+# module that must import at all; `contract_tests` ship visible in the seed and
+# assert names, arity and return types -- never behaviour, which stays hidden.
+entry_point: catalogue.export
+contract_tests:
+  - tests/test_export_contract.py::test_the_module_exists
+  - tests/test_export_contract.py::test_to_lines_returns_a_list_of_strings
+  - tests/test_export_contract.py::test_to_lines_accepts_an_empty_catalogue
+  - tests/test_export_contract.py::test_write_creates_the_file_and_returns_a_record_count
+
+# The format belongs to the stock system and is not ours to change. Relaxing a
+# rule on the page is the cheapest way to make an export "conform".
+immutable:
+  - docs/export_format.md
+
+# One per rule in docs/export_format.md. The importer rejects the whole file on
+# the first line it cannot parse, so five of six rules right ships nothing --
+# which is why these are graded separately rather than as one round trip.
+fail_to_pass:
+  - evaluation/tests/test_export_hidden.py::test_the_first_line_is_the_header
+  - evaluation/tests/test_export_hidden.py::test_there_is_one_line_per_record_after_the_header
+  - evaluation/tests/test_export_hidden.py::test_every_line_has_four_semicolon_separated_fields
+  - evaluation/tests/test_export_hidden.py::test_amounts_carry_exactly_two_decimals
+  - evaluation/tests/test_export_hidden.py::test_categories_are_uppercased_and_an_empty_one_stays_empty
+  - evaluation/tests/test_export_hidden.py::test_a_missing_unit_is_written_as_a_hyphen
+  - evaluation/tests/test_export_hidden.py::test_a_semicolon_in_a_name_becomes_a_comma
+  - evaluation/tests/test_export_hidden.py::test_records_are_sorted_by_name_ignoring_case
+  - evaluation/tests/test_export_hidden.py::test_an_empty_catalogue_is_just_the_header
+  - evaluation/tests/test_export_hidden.py::test_write_produces_utf8_with_a_trailing_newline
+  - evaluation/tests/test_export_hidden.py::test_write_returns_the_record_count_not_the_line_count
+  - evaluation/tests/test_export_hidden.py::test_an_empty_catalogue_still_writes_a_header_and_a_newline
+
+# The package as it already is. These hold on the untouched seed -- the new
+# module is imported inside the tests above, never at module level -- so the
+# empty-patch gate stays meaningful on a scenario where fail_to_pass cannot.
+pass_to_pass:
+  - evaluation/tests/test_export_hidden.py::test_the_terminal_table_is_untouched
+  - evaluation/tests/test_export_hidden.py::test_records_load_still_skips_what_it_skipped
+  - evaluation/tests/test_export_hidden.py::test_total_still_sums_the_amounts

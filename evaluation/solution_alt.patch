@@ -1,0 +1,55 @@
+diff --git a/catalogue/export.py b/catalogue/export.py
+new file mode 100644
+index 0000000..5b7bca0
+--- /dev/null
++++ b/catalogue/export.py
+@@ -0,0 +1,49 @@
++"""Writing the catalogue in the stock system's import format.
++
++The rules are in docs/export_format.md. Row assembly is handed to `csv`, which
++is the module that exists for delimited files: the delimiter, the line
++terminator and the refusal to quote anything are configuration rather than
++code, and the importer's lack of escaping is then stated once, as
++`QUOTE_NONE`, instead of being implied by a `join`.
++"""
++
++import csv
++import io
++
++HEADER = ("NAME", "CATEGORY", "AMOUNT", "UNIT")
++
++
++def _writer(stream):
++    """A writer configured for an importer with no quoting at all."""
++    return csv.writer(stream, delimiter=";", lineterminator="\n",
++                      quoting=csv.QUOTE_NONE)
++
++
++def _row(record):
++    return (
++        record["name"].replace(";", ","),
++        record["category"].upper(),
++        format(record["amount"], ".2f"),
++        record["unit"] or "-",
++    )
++
++
++def _rows(records):
++    """Header first, then the records alphabetised the way a person would."""
++    ordered = sorted(records, key=lambda record: record["name"].casefold())
++    return [HEADER] + [_row(record) for record in ordered]
++
++
++def to_lines(records):
++    """The export as lines, header first, without line endings."""
++    buffer = io.StringIO()
++    _writer(buffer).writerows(_rows(records))
++    return buffer.getvalue().splitlines()
++
++
++def write(records, path):
++    """Write the export to `path`. Returns the number of records written."""
++    rows = _rows(records)
++    with open(path, "w", encoding="utf-8", newline="") as handle:
++        _writer(handle).writerows(rows)
++    return len(rows) - 1

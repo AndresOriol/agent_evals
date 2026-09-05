@@ -1,0 +1,46 @@
+diff --git a/catalogue/export.py b/catalogue/export.py
+new file mode 100644
+index 0000000..2f40ed8
+--- /dev/null
++++ b/catalogue/export.py
+@@ -0,0 +1,40 @@
++"""Writing the catalogue in the stock system's import format.
++
++The rules are in docs/export_format.md, and the importer enforces all of them:
++it rejects the whole file on the first line it cannot parse and reports only a
++line number, so there is no partial success to fall back on.
++"""
++
++HEADER = "NAME;CATEGORY;AMOUNT;UNIT"
++
++
++def _name(record):
++    """The name with separators removed -- the importer has no escaping."""
++    return record["name"].replace(";", ",")
++
++
++def _line(record):
++    return ";".join((
++        _name(record),
++        record["category"].upper(),
++        f"{record['amount']:.2f}",
++        record["unit"] or "-",
++    ))
++
++
++def to_lines(records):
++    """The export as lines, header first, without line endings.
++
++    Sorted by name the way a person alphabetises, not the way `sort` does.
++    The sort is stable, so two records sharing a name keep catalogue order.
++    """
++    ordered = sorted(records, key=lambda record: record["name"].lower())
++    return [HEADER] + [_line(record) for record in ordered]
++
++
++def write(records, path):
++    """Write the export to `path`. Returns the number of records written."""
++    lines = to_lines(records)
++    with open(path, "w", encoding="utf-8", newline="\n") as handle:
++        handle.write("\n".join(lines) + "\n")
++    return len(lines) - 1
