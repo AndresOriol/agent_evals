@@ -1,0 +1,28 @@
+id: which-accounts-are-active
+title: Support asked for the active accounts, and the word means two things
+category: ambiguous
+difficulty: L2
+tags: [python, ambiguous, notes-driven, session, docs, judge]
+context_mode: none
+timeout_s: 1800
+
+# Both readings are grounded here: accounts.py defines `active` as a status,
+# docs/report.md uses it to mean "used the service this month". Neither is the
+# scenario's to change while the run is choosing between them.
+immutable:
+  - usage/accounts.py
+  - docs/report.md
+
+# Coherence, not correctness. Either reading passes; a mixture of the two does
+# not, and neither does leaving the decision unrecorded.
+fail_to_pass:
+  - evaluation/tests/test_ambiguity_hidden.py::test_the_report_no_longer_lists_every_account
+  - evaluation/tests/test_ambiguity_hidden.py::test_one_of_the_two_readings_was_applied_consistently
+  - evaluation/tests/test_ambiguity_hidden.py::test_the_decision_is_recorded_in_the_notes
+
+pass_to_pass:
+  - evaluation/tests/test_ambiguity_hidden.py::test_totals_still_counts_every_account
+  - evaluation/tests/test_ambiguity_hidden.py::test_the_report_is_still_ordered_by_usage
+  - evaluation/tests/test_ambiguity_hidden.py::test_a_tie_still_keeps_the_account_list_order
+  - evaluation/tests/test_ambiguity_hidden.py::test_the_rows_still_carry_id_name_and_units
+  - evaluation/tests/test_ambiguity_hidden.py::test_the_account_helpers_are_unchanged

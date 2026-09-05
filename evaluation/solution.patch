@@ -1,0 +1,64 @@
+diff --git a/NOTES.md b/NOTES.md
+index cb65749..642de48 100644
+--- a/NOTES.md
++++ b/NOTES.md
+@@ -2,6 +2,37 @@
+ 
+ Working journal for the usage report. Newest first.
+ 
++## 2026-08-28 — "active" had two meanings, and I picked the status
++
++Support asked for "the active accounts" and the word means two different
++things in this repository.
++
++`usage/accounts.py` defines `active` as a **status**, one of three, and
++documents what each one means. `docs/report.md` uses it the other way — support
++"finds the accounts that were *active* over the period", which is accounts that
++accrued usage. The two disagree in exactly two places, and we have one of each
++on the books: Initech is suspended and still accrued 12 units, and Umbrella is
++active and used nothing.
++
++I have gone with the **status**, so Umbrella stays on the report and Initech
++comes off it. Three reasons:
++
++1. It is the only reading the code carries a definition for. The usage reading
++   exists in a sentence of prose; the status reading exists in a field, a
++   constant and two functions.
++2. It is stable. An account's status does not change because a month was quiet,
++   so the report does not gain and lose rows month to month for accounts nobody
++   has touched.
++3. Dropping suspended accounts is the more reversible mistake. If support
++   wanted the usage reading, they notice immediately that a busy account is
++   missing. Under the other reading a suspended account with usage silently
++   disappears from the only report that shows it, and billing is still
++   invoicing it — `docs/report.md` says an invoice with no report line is a
++   query they answer by hand.
++
++If this is wrong the change is one line, and the second reading is
++`used[account["id"]] > 0`.
++
+ ## 2026-08-27 — the report is mostly noise
+ 
+ Support says the monthly report has grown to the point where they scroll past
+diff --git a/usage/report.py b/usage/report.py
+index 1736450..a733e26 100644
+--- a/usage/report.py
++++ b/usage/report.py
+@@ -17,10 +17,16 @@ def totals(accounts, events):
+ def monthly(accounts, events):
+     """The report: `(id, name, units)` per account, most units first.
+ 
++    Only accounts whose status is `active` appear. "Active" is read as the
++    status because that is the only definition the code carries -- see the
++    2026-08-28 entry in NOTES.md for why, and for what the other reading
++    would have done.
++
+     Accounts with equal usage keep the order they arrive in, which is the
+     order the account list is maintained in.
+     """
+     used = totals(accounts, events)
+     rows = [(account["id"], account["name"], used[account["id"]])
+-            for account in accounts]
++            for account in accounts
++            if account["status"] == "active"]
+     return sorted(rows, key=lambda row: -row[2])
