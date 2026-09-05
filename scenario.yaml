@@ -1,0 +1,28 @@
+id: cover-the-rejections
+title: The parser is right and the suite does not say so
+category: tests
+difficulty: L2
+tags: [python, tests, mutation, docs, notes-driven, session]
+context_mode: none
+timeout_s: 1800
+
+# The exercise is to describe the module's behaviour, not to change it. Editing
+# the source so a test that was easier to write becomes true inverts the task,
+# and it would also move the anchors the mutants are applied at.
+immutable:
+  - durations/parse.py
+
+# One mutant per rule in docs/durations.md that the seed's two tests do not
+# reach. Each seeds a broken variant, runs the visible suite against it, and
+# asserts the suite notices.
+fail_to_pass:
+  - evaluation/tests/test_mutants_hidden.py::test_the_suite_catches_a_bare_number_read_as_minutes
+  - evaluation/tests/test_mutants_hidden.py::test_the_suite_catches_units_becoming_case_sensitive
+  - evaluation/tests/test_mutants_hidden.py::test_the_suite_catches_a_negative_duration_being_accepted
+  - evaluation/tests/test_mutants_hidden.py::test_the_suite_catches_a_missing_value_becoming_none
+  - evaluation/tests/test_mutants_hidden.py::test_the_suite_catches_a_trailing_number_being_accepted
+
+# The other half of the contract. Without it a file containing `assert False`
+# catches every mutant above and scores a perfect fail_to_pass.
+pass_to_pass:
+  - evaluation/tests/test_mutants_hidden.py::test_the_suite_passes_against_the_real_module
