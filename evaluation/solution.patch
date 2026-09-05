@@ -1,0 +1,39 @@
+diff --git a/docs/stocktake.md b/docs/stocktake.md
+index 5b0f53e..6fc22db 100644
+--- a/docs/stocktake.md
++++ b/docs/stocktake.md
+@@ -7,9 +7,15 @@
+ | Key | What it holds |
+ | --- | --- |
+ | `lines` | one entry per SKU compared, each with `sku`, `counted`, `expected` and `delta` |
++| `checked` | how many SKUs were compared |
++| `delta_total` | the sum of the absolute deltas across every line |
+ 
+ `delta` is `counted - expected`: negative means stock is missing.
+ 
++A SKU that is expected and was not counted at all is still a line, with
++`counted` 0 and a delta of `-expected`. A pallet that walked off the site is
++what the count exists to catch, so its absence has to be visible.
++
+ ## Lines are always ordered by SKU
+ 
+ `lines` comes back sorted by `sku`, ascending, and by nothing else. This is not
+diff --git a/stocktake/reconcile.py b/stocktake/reconcile.py
+index d8e1399..df62302 100644
+--- a/stocktake/reconcile.py
++++ b/stocktake/reconcile.py
+@@ -12,9 +12,11 @@ def reconcile(counted, expected):
+     docs/stocktake.md for what is in it and what the importer relies on.
+     """
+     lines = []
+-    for sku in sorted(counted):
+-        have = counted[sku]
++    for sku in sorted(set(counted) | set(expected)):
++        have = counted.get(sku, 0)
+         want = expected.get(sku, 0)
+         lines.append({"sku": sku, "counted": have, "expected": want,
+                       "delta": have - want})
+-    return {"lines": lines}
++    return {"lines": lines,
++            "checked": len(lines),
++            "delta_total": sum(abs(line["delta"]) for line in lines)}
