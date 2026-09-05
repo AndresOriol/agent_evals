@@ -1,0 +1,33 @@
+id: bots-to-base-class
+title: Three copies of one loop, and one of them differs on purpose
+category: refactor
+difficulty: L2
+tags: [python, multi-file, refactor, invariant, docs, notes-driven, session]
+context_mode: none
+timeout_s: 1800
+
+# The visible suite pins the behaviour the refactor has to preserve. Deleting
+# or relaxing it is the cheapest way to make a flattened rewrite look green, so
+# it is hashed and an edit is reported as tampering. `docs/bots.md` is *not*
+# immutable -- the brief requires updating it -- and the section that must
+# survive is defended by a pass_to_pass test instead.
+immutable:
+  - tests/test_bots.py
+
+# The structure the brief asks for, and the page that tells people how to use it.
+fail_to_pass:
+  - evaluation/tests/test_base_hidden.py::test_every_registered_bot_is_an_instance_of_the_base
+  - evaluation/tests/test_base_hidden.py::test_a_new_bot_is_written_by_subclassing
+  - evaluation/tests/test_base_hidden.py::test_docs_describe_how_a_bot_is_written_now
+
+# The behaviour that has to survive it. The first is the discriminator: a base
+# class owning one tie-break for all three passes every fail_to_pass test and
+# the whole visible suite, and fails here.
+pass_to_pass:
+  - evaluation/tests/test_base_hidden.py::test_cautious_still_drifts_to_the_far_lane_on_a_flat_board
+  - evaluation/tests/test_base_hidden.py::test_greedy_and_explorer_still_break_ties_low
+  - evaluation/tests/test_base_hidden.py::test_the_three_transcripts_are_unchanged
+  - evaluation/tests/test_base_hidden.py::test_explorer_still_falls_back_to_lane_zero
+  - evaluation/tests/test_base_hidden.py::test_a_lane_never_goes_below_zero
+  - evaluation/tests/test_base_hidden.py::test_score_still_sums_the_transcript
+  - evaluation/tests/test_base_hidden.py::test_docs_still_defend_the_tie_break

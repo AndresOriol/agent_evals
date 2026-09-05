@@ -1,0 +1,205 @@
+diff --git a/bots/base.py b/bots/base.py
+new file mode 100644
+index 0000000..5d14769
+--- /dev/null
++++ b/bots/base.py
+@@ -0,0 +1,35 @@
++"""What every bot has in common.
++
++A bot scores each lane and takes the best-scoring one. `Bot` owns that loop;
++a subclass supplies `score` and, if it needs one, a different tie-break.
++"""
++
++
++class Bot:
++    """The shared decision loop."""
++
++    def score(self, index, value, state):
++        """This bot's score for one lane. Higher wins."""
++        raise NotImplementedError
++
++    def tie_break(self):
++        """Which index wins when two lanes score the same: "low" or "high"."""
++        return "low"
++
++    def decide(self, state):
++        """The index of the lane this bot takes this turn."""
++        keep_later = self.tie_break() == "high"
++        best = None
++        choice = None
++        for index, value in enumerate(state["lanes"]):
++            current = self.score(index, value, state)
++            if current is None:
++                continue
++            if best is None or current > best or (keep_later and current == best):
++                best = current
++                choice = index
++        return self.fallback(state) if choice is None else choice
++
++    def fallback(self, state):
++        """The lane to take when this bot scored none of them."""
++        return 0
+diff --git a/bots/cautious.py b/bots/cautious.py
+index e13c1ca..190c544 100644
+--- a/bots/cautious.py
++++ b/bots/cautious.py
+@@ -3,17 +3,18 @@
+ Takes the thinnest lane on the board, leaving the rich ones for later.
+ """
+ 
++from bots.base import Bot
+ 
+-def decide(state):
+-    """The index of the lane this bot takes this turn.
+ 
+-    Lowest value wins; ties go to the **higher** index. The tie-break is not
+-    the same as the other bots' and that is deliberate -- see docs/bots.md.
++class Cautious(Bot):
++    """Lowest value wins; ties go to the **higher** index.
++
++    The tie-break is not the same as the other bots' and that is deliberate --
++    see docs/bots.md.
+     """
+-    best = None
+-    choice = None
+-    for index, value in enumerate(state["lanes"]):
+-        if best is None or value <= best:
+-            best = value
+-            choice = index
+-    return choice
++
++    def score(self, index, value, state):
++        return -value
++
++    def tie_break(self):
++        return "high"
+diff --git a/bots/engine.py b/bots/engine.py
+index bce8a0c..239f85b 100644
+--- a/bots/engine.py
++++ b/bots/engine.py
+@@ -14,11 +14,11 @@ def play(name, lanes, turns):
+     The bot takes a lane, collects what is in it, and the lane thins by one to
+     a floor of zero. `used` accumulates every lane the bot has taken.
+     """
+-    decide = registry.get(name)
++    bot = registry.get(name)
+     state = {"lanes": list(lanes), "used": []}
+     transcript = []
+     for _ in range(turns):
+-        lane = decide(state)
++        lane = bot.decide(state)
+         reward = state["lanes"][lane]
+         transcript.append((lane, reward))
+         state["used"].append(lane)
+diff --git a/bots/explorer.py b/bots/explorer.py
+index 33f189a..42e32d0 100644
+--- a/bots/explorer.py
++++ b/bots/explorer.py
+@@ -4,20 +4,13 @@ Takes the richest lane it has not taken before, and falls back to lane 0 once
+ it has taken all of them.
+ """
+ 
++from bots.base import Bot
+ 
+-def decide(state):
+-    """The index of the lane this bot takes this turn.
+ 
+-    Highest value among unused lanes; ties go to the lower index.
+-    """
+-    best = None
+-    choice = None
+-    for index, value in enumerate(state["lanes"]):
++class Explorer(Bot):
++    """Highest value among unused lanes; ties go to the lower index."""
++
++    def score(self, index, value, state):
+         if index in state["used"]:
+-            continue
+-        if best is None or value > best:
+-            best = value
+-            choice = index
+-    if choice is None:
+-        return 0
+-    return choice
++            return None
++        return value
+diff --git a/bots/greedy.py b/bots/greedy.py
+index 1b89022..e1aac50 100644
+--- a/bots/greedy.py
++++ b/bots/greedy.py
+@@ -3,16 +3,11 @@
+ Takes the richest lane on the board every turn.
+ """
+ 
++from bots.base import Bot
+ 
+-def decide(state):
+-    """The index of the lane this bot takes this turn.
+ 
+-    Highest value wins; ties go to the lower index.
+-    """
+-    best = None
+-    choice = None
+-    for index, value in enumerate(state["lanes"]):
+-        if best is None or value > best:
+-            best = value
+-            choice = index
+-    return choice
++class Greedy(Bot):
++    """Highest value wins; ties go to the lower index."""
++
++    def score(self, index, value, state):
++        return value
+diff --git a/bots/registry.py b/bots/registry.py
+index 3b76fd1..7bed298 100644
+--- a/bots/registry.py
++++ b/bots/registry.py
+@@ -1,14 +1,17 @@
+ """The bots the engine can play, by name.
+ 
+-A bot is anything callable that takes the state and returns a lane index.
++A bot is a `bots.base.Bot` instance: the engine asks it to `decide(state)` and
++it returns a lane index.
+ """
+ 
+-from bots import cautious, explorer, greedy
++from bots.cautious import Cautious
++from bots.explorer import Explorer
++from bots.greedy import Greedy
+ 
+ BOTS = {
+-    "greedy": greedy.decide,
+-    "cautious": cautious.decide,
+-    "explorer": explorer.decide,
++    "greedy": Greedy(),
++    "cautious": Cautious(),
++    "explorer": Explorer(),
+ }
+ 
+ 
+diff --git a/docs/bots.md b/docs/bots.md
+index 96f05dd..d11e58a 100644
+--- a/docs/bots.md
++++ b/docs/bots.md
+@@ -32,6 +32,18 @@ accident of how the loop was written, and it survives any rewrite of the loop.
+ 
+ ## Adding a bot
+ 
+-Today: write a module with a `decide(state)` function and add it to
+-`bots/registry.py`. `state` is a dict with `lanes` (the values on the board
+-now) and `used` (every lane index this bot has taken so far).
++Subclass `bots.base.Bot` and implement `score(self, index, value, state)`,
++returning this bot's score for one lane — higher wins. Return `None` for a lane
++the bot will not take. Then register an instance in `bots/registry.py`.
++
++`state` is a dict with `lanes` (the values on the board now) and `used` (every
++lane index this bot has taken so far).
++
++The base class owns the decision loop, so a bot supplies only what makes it
++different:
++
++- `tie_break(self)` returns `"low"` or `"high"` and decides which index wins
++  when two lanes score the same. The default is `"low"`; `cautious` overrides
++  it to `"high"` for the reason above.
++- `fallback(self, state)` returns the lane to take when the bot scored none of
++  them. The default is lane 0, which is what `explorer` relies on.
