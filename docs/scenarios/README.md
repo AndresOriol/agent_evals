@@ -13,7 +13,7 @@ workdir. Start from the table, or walk a topic line from its first scenario to
 its last.
 
 
-**10 scenarios across 9 topics.** See also: [what each agent version scored](../results/README.md) · [how the set is laid out](../../README.md).
+**11 scenarios across 10 topics.** See also: [what each agent version scored](../results/README.md) · [how the set is laid out](../../README.md).
 
 ## The set
 
@@ -27,6 +27,7 @@ its last.
 | [`stale-categories`](ledger/stale-categories.md) | `topic/ledger` | bugfix | L1 | `session-from-notes`, `stale-categories` | 3 / 3 | A symptom and a green suite, with nothing naming the file — the whole probe is localisation. |
 | [`model-v3-propagation`](pipeline/model-v3-propagation.md) | `topic/pipeline` | long-context | L3 | `adapt-to-model`, `session-from-notes` | 3 / 7 | Two rules changed in a long specification, only one of them is in the changelog, and the obvious fix for the other destroys the distinction it exists to protect. |
 | [`duration-notes`](sessions/duration-notes.md) | `topic/sessions` | feature | L1 | `session-from-notes` | 6 / 2 | The requirement is in NOTES.md, not the prompt, and the README it makes false is graded like code. |
+| [`worst-first`](stocktake/worst-first.md) | `topic/stocktake` | trap | L2 | `session-from-notes`, `stocktake` | 8 / 3 | Three of the four are ordinary work. The fourth is the one the documentation |
 | [`cover-the-rejections`](suite/cover-the-rejections.md) | `topic/suite` | tests | L2 | `cover-the-rejections`, `session-from-notes` | 5 / 1 | A suite cannot be graded by running it, and the seed's suite is green for the wrong reason. |
 | [`which-accounts-are-active`](usage/which-accounts-are-active.md) | `topic/usage` | ambiguous | L2 | `session-from-notes` | 3 / 6 | Two readings of one word, both supported by the tree, and nobody awake to be asked which one was meant. |
 
@@ -41,7 +42,7 @@ The eight categories the set is meant to cover. An empty one is a gap, not a cat
 - **refactor** — [`bots-to-base-class`](bots/bots-to-base-class.md)
 - **long-context** — [`model-v3-propagation`](pipeline/model-v3-propagation.md)
 - **ambiguous** — [`which-accounts-are-active`](usage/which-accounts-are-active.md)
-- **trap** — [`count-and-share`](ledger/count-and-share.md)
+- **trap** — [`count-and-share`](ledger/count-and-share.md), [`worst-first`](stocktake/worst-first.md)
 
 ## By level
 
@@ -49,7 +50,7 @@ L0 checks the harness rather than the agent; L3 is a scenario a strong session s
 
 - **L0** — [`retry-after-case`](http-headers/retry-after-case.md)
 - **L1** — [`stale-categories`](ledger/stale-categories.md), [`duration-notes`](sessions/duration-notes.md)
-- **L2** — [`threshold-off-by-one`](alerts/threshold-off-by-one.md), [`bots-to-base-class`](bots/bots-to-base-class.md), [`stock-export`](export/stock-export.md), [`count-and-share`](ledger/count-and-share.md), [`cover-the-rejections`](suite/cover-the-rejections.md), [`which-accounts-are-active`](usage/which-accounts-are-active.md)
+- **L2** — [`threshold-off-by-one`](alerts/threshold-off-by-one.md), [`bots-to-base-class`](bots/bots-to-base-class.md), [`stock-export`](export/stock-export.md), [`count-and-share`](ledger/count-and-share.md), [`worst-first`](stocktake/worst-first.md), [`cover-the-rejections`](suite/cover-the-rejections.md), [`which-accounts-are-active`](usage/which-accounts-are-active.md)
 - **L3** — [`model-v3-propagation`](pipeline/model-v3-propagation.md)
 
 ## Topic lines
@@ -84,6 +85,10 @@ Each commit on a topic branch is a scenario, and each one is the previous scenar
 ### `topic/sessions`
 
 1. [`duration-notes`](sessions/duration-notes.md) — The parser rejects the durations the logs actually write
+
+### `topic/stocktake`
+
+1. [`worst-first`](stocktake/worst-first.md) — Sort the worst offenders to the top
 
 ### `topic/suite`
 
