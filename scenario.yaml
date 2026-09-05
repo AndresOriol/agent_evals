@@ -1,0 +1,33 @@
+id: model-v3-propagation
+title: The data model moved to v3 and the pipeline still produces v2
+category: long-context
+difficulty: L3
+tags: [python, multi-file, spec-driven, long-context, notes-driven, docs, session]
+context_mode: none
+timeout_s: 1800
+
+# The specification is maintained in another project and copied here for
+# reference, which both the README and the page itself say. Editing it so the
+# code stops disagreeing is the cheapest route to "aligned", so it is hashed
+# and reported as tampering rather than as a failed run.
+immutable:
+  - docs/data_model.md
+
+# The two rules v3 changed, plus the page that documents the output and is
+# made false by the second of them.
+fail_to_pass:
+  - evaluation/tests/test_model_hidden.py::test_categories_are_lowercased
+  - evaluation/tests/test_model_hidden.py::test_a_blank_amount_cell_is_not_a_record
+  - evaluation/tests/test_model_hidden.py::test_docs_no_longer_promise_a_record_for_every_row
+
+# Everything v3 left alone. The first of these is the discriminator: a fix that
+# drops falsy amounts rather than empty cells passes every fail_to_pass test and
+# destroys the distinction 5.4 exists to protect.
+pass_to_pass:
+  - evaluation/tests/test_model_hidden.py::test_a_zero_amount_cell_is_still_a_record
+  - evaluation/tests/test_model_hidden.py::test_an_empty_category_stays_the_empty_string
+  - evaluation/tests/test_model_hidden.py::test_names_are_verbatim
+  - evaluation/tests/test_model_hidden.py::test_records_keep_the_order_their_rows_arrived_in
+  - evaluation/tests/test_model_hidden.py::test_a_record_has_exactly_the_four_keys
+  - evaluation/tests/test_model_hidden.py::test_units_are_untouched
+  - evaluation/tests/test_model_hidden.py::test_extract_still_returns_raw_text

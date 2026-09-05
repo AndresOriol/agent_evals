@@ -1,0 +1,64 @@
+diff --git a/docs/pipeline.md b/docs/pipeline.md
+index 2c902ce..adec127 100644
+--- a/docs/pipeline.md
++++ b/docs/pipeline.md
+@@ -11,10 +11,11 @@ the rules in [docs/data_model.md](data_model.md).
+ - Records come out in the order their rows went in.
+ - `name` is the supplier's text, untouched.
+ - Amounts written with a comma and amounts written with a dot both parse.
+-- **One row in, one record out.** A row whose amount cell is blank is still a
+-  record, carrying an amount of `0.00`, so the number of records this pipeline
+-  returns always equals the number of rows it was given. Downstream code relies
+-  on that to report a row index for a rejected record.
++- `category` is lowercased, so one facet does not split across three spellings.
++- **Not every row becomes a record.** A row whose amount cell is blank is
++  dropped: nothing was measured, so there is nothing to store. A row whose
++  amount cell holds `0` is kept, with an amount of `0.00` — that is a
++  measurement of zero, and the two are different findings.
+ 
+ ## Not done here
+ 
+diff --git a/pipeline/normalise.py b/pipeline/normalise.py
+index 0da728c..8b699a8 100644
+--- a/pipeline/normalise.py
++++ b/pipeline/normalise.py
+@@ -7,24 +7,33 @@ bug, and so is anything the model asks for that is not done here.
+ 
+ 
+ def _amount(raw):
+-    """The amount as a float.
++    """The amount as a float, or None if the supplier left the cell blank.
+ 
+-    An empty cell means the supplier left the column blank.
++    The distinction is the point (data model 5.4): a blank cell means the
++    measurement was never taken, while a cell holding `0` is a measurement of
++    zero and is stored like any other. Testing the cell rather than the parsed
++    value is what keeps the two apart.
+     """
+     text = raw.replace(",", ".").strip()
+     if not text:
+-        return 0.0
++        return None
+     return float(text)
+ 
+ 
+ def normalise(rows):
+-    """Catalogue records, in the order the rows arrived."""
++    """Catalogue records, in the order the rows arrived.
++
++    Rows with no amount are dropped rather than stored with a zero (5.4).
++    """
+     records = []
+     for row in rows:
++        amount = _amount(row["amount"])
++        if amount is None:
++            continue
+         records.append({
+             "name": row["name"],
+-            "category": row["category"],
+-            "amount": _amount(row["amount"]),
++            "category": row["category"].lower(),
++            "amount": amount,
+             "unit": row["unit"],
+         })
+     return records
