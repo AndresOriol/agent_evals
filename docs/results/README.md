@@ -13,7 +13,7 @@ traces — stays local, and each row names the `run_id` that holds it.
 because that is what the run records say.
 
 
-**75 runs across 23 agent versions.** 4 stub run(s) excluded — a stub writes a hardcoded file and calls no model, so its runs measure the runner rather than an agent.
+**95 runs across 25 agent versions.** 4 stub run(s) excluded — a stub writes a hardcoded file and calls no model, so its runs measure the runner rather than an agent.
 
 ## Agent versions
 
@@ -23,6 +23,8 @@ because that is what the run records say.
 | `adhoc-harness` | `b861e11a` | 3 | 2/3 | 21%–94% | clean | 17,746 | 0 | 20.3 | 5.7 | — | 0 | reasoning=1 |
 | `baseline` | `a9e8c741` | 6 | 6/6 | 61%–100% | clean | 195,368 | 0 | 16.2 | 4.5 | — | 0 | — |
 | `code` | `4d5cad0e` | 10 | 7/10 | 40%–89% | 6 flagged by the previous oracle | 598,995 | 0 | 25.6 | 8.8 | — | 0 | reasoning=1 |
+| `code` | `72748b4d` | 10 | 8/10 | 49%–94% | 5 extended | 692,227 | 30,428 | 22.1 | 3.2 | 10/10 | 16 | reasoning=2 |
+| `code-step-budget` | `b8028901` | 10 | 8/10 | 49%–94% | 5 extended | 616,415 | 32,072 | 18.8 | 2.3 | 10/10 | 17 | reasoning=2 |
 | `context-and-gate` | `25e89ea9` | 2 | 0/2 | 0%–66% | 2 flagged by the previous oracle | 136,700 | 0 | 51.0 | 17.5 | — | 0 | — |
 | `context-and-gate` | `4c24a546` | 3 | 2/3 | 21%–94% | clean | 183,637 | 0 | 80.3 | 29.3 | — | 0 | stopping=2 |
 | `context-and-gate` | `710447ea` | 4 | 3/4 | 30%–95% | 3 flagged by the previous oracle | 158,960 | 0 | 74.2 | 34.5 | — | 0 | — |
@@ -59,18 +61,19 @@ Which scenarios still separate one version from another. A row every version pas
 
 | Scenario / task | runs | solved | integrity | versions | `tokens_in` mean |
 | --- | --- | --- | --- | --- | --- |
-| [`bots-to-base-class`](../scenarios/bots/bots-to-base-class.md) / `session-from-notes` | 1 | 1/1 | 1 flagged by the previous oracle | 1 | 1,325,314 |
+| [`bots-to-base-class`](../scenarios/bots/bots-to-base-class.md) / `session-from-notes` | 3 | 3/3 | 2 extended, 1 flagged by the previous oracle | 3 | 1,357,123 |
 | [`count-and-share`](../scenarios/ledger/count-and-share.md) / `count-and-share` | 6 | 1/6 | 3 flagged by the previous oracle | 5 | 171,119 |
-| [`count-and-share`](../scenarios/ledger/count-and-share.md) / `session-from-notes` | 9 | 1/9 | 3 flagged by the previous oracle | 8 | 140,247 |
-| [`cover-the-rejections`](../scenarios/suite/cover-the-rejections.md) / `session-from-notes` | 1 | 1/1 | clean | 1 | 313,388 |
-| [`duration-notes`](../scenarios/sessions/duration-notes.md) / `session-from-notes` | 3 | 1/3 | 1 flagged by the previous oracle | 2 | 209,085 |
-| [`model-v3-propagation`](../scenarios/pipeline/model-v3-propagation.md) / `session-from-notes` | 1 | 1/1 | clean | 1 | 689,176 |
+| [`count-and-share`](../scenarios/ledger/count-and-share.md) / `session-from-notes` | 11 | 3/11 | 2 extended, 3 flagged by the previous oracle | 10 | 209,115 |
+| [`cover-the-rejections`](../scenarios/suite/cover-the-rejections.md) / `session-from-notes` | 3 | 3/3 | clean | 3 | 356,178 |
+| [`duration-notes`](../scenarios/sessions/duration-notes.md) / `session-from-notes` | 5 | 3/5 | 2 extended, 1 flagged by the previous oracle | 4 | 291,295 |
+| [`model-v3-propagation`](../scenarios/pipeline/model-v3-propagation.md) / `session-from-notes` | 3 | 1/3 | clean | 3 | 772,056 |
 | [`retry-after-case`](../scenarios/http-headers/retry-after-case.md) / `fix-from-failing-test` | 35 | 20/35 | clean | 11 | 44,050 |
-| [`stale-categories`](../scenarios/ledger/stale-categories.md) / `session-from-notes` | 3 | 3/3 | 1 flagged by the previous oracle | 3 | 199,727 |
+| [`stale-categories`](../scenarios/ledger/stale-categories.md) / `session-from-notes` | 5 | 5/5 | 2 extended, 1 flagged by the previous oracle | 5 | 359,609 |
 | [`stale-categories`](../scenarios/ledger/stale-categories.md) / `stale-categories` | 1 | 1/1 | clean | 1 | 128,314 |
-| [`stock-export`](../scenarios/export/stock-export.md) / `session-from-notes` | 1 | 1/1 | clean | 1 | 604,334 |
-| [`threshold-off-by-one`](../scenarios/alerts/threshold-off-by-one.md) / `session-from-notes` | 12 | 7/12 | 5 flagged by the previous oracle | 9 | 196,445 |
-| [`which-accounts-are-active`](../scenarios/usage/which-accounts-are-active.md) / `session-from-notes` | 2 | 1/2 | 1 flagged by the previous oracle | 1 | 604,971 |
+| [`stock-export`](../scenarios/export/stock-export.md) / `session-from-notes` | 3 | 3/3 | clean | 3 | 728,001 |
+| [`threshold-off-by-one`](../scenarios/alerts/threshold-off-by-one.md) / `session-from-notes` | 14 | 9/14 | 2 extended, 5 flagged by the previous oracle | 11 | 250,877 |
+| [`which-accounts-are-active`](../scenarios/usage/which-accounts-are-active.md) / `session-from-notes` | 4 | 1/4 | 1 flagged by the previous oracle | 3 | 647,342 |
+| [`worst-first`](../scenarios/stocktake/worst-first.md) / `session-from-notes` | 2 | 2/2 | clean | 2 | 525,108 |
 
 ## Every run
 
@@ -88,6 +91,26 @@ Chronological. The evidence for each is in `evals/results/runs/<run_id>/` on the
 | `20260905T152144Z_cover-the-rejections_session-from-notes_code_r1` | [`cover-the-rejections`](../scenarios/suite/cover-the-rejections.md) / `session-from-notes` | `code` @ `4d5cad0e` | yes | pass | — | — | 313,388 |
 | `20260905T152245Z_which-accounts-are-active_session-from-notes_code_r1` | [`which-accounts-are-active`](../scenarios/usage/which-accounts-are-active.md) / `session-from-notes` | `code` @ `4d5cad0e` | yes | tampered | `docs/report.md` (previous oracle) | — | 621,584 |
 | `20260905T162835Z_which-accounts-are-active_session-from-notes_code_r1` | [`which-accounts-are-active`](../scenarios/usage/which-accounts-are-active.md) / `session-from-notes` | `code` @ `4d5cad0e` | no | fail | — | reasoning | 588,358 |
+| `20260907T071321Z_threshold-off-by-one_session-from-notes_code_r1` | [`threshold-off-by-one`](../scenarios/alerts/threshold-off-by-one.md) / `session-from-notes` | `code` @ `72748b4d` | yes | pass | extended `tests/test_alerts.py` | — | 550,246 |
+| `20260907T071534Z_threshold-off-by-one_session-from-notes_code-step-budget_r1` | [`threshold-off-by-one`](../scenarios/alerts/threshold-off-by-one.md) / `session-from-notes` | `code-step-budget` @ `b8028901` | yes | pass | extended `tests/test_alerts.py` | — | 332,536 |
+| `20260907T071726Z_bots-to-base-class_session-from-notes_code_r1` | [`bots-to-base-class`](../scenarios/bots/bots-to-base-class.md) / `session-from-notes` | `code` @ `72748b4d` | yes | pass | extended `tests/test_bots.py` | — | 1,589,592 |
+| `20260907T072013Z_bots-to-base-class_session-from-notes_code-step-budget_r1` | [`bots-to-base-class`](../scenarios/bots/bots-to-base-class.md) / `session-from-notes` | `code-step-budget` @ `b8028901` | yes | pass | extended `tests/test_bots.py` | — | 1,156,464 |
+| `20260907T072443Z_stock-export_session-from-notes_code_r1` | [`stock-export`](../scenarios/export/stock-export.md) / `session-from-notes` | `code` @ `72748b4d` | yes | pass | — | — | 791,228 |
+| `20260907T072656Z_stock-export_session-from-notes_code-step-budget_r1` | [`stock-export`](../scenarios/export/stock-export.md) / `session-from-notes` | `code-step-budget` @ `b8028901` | yes | pass | — | — | 788,440 |
+| `20260907T072906Z_count-and-share_session-from-notes_code_r1` | [`count-and-share`](../scenarios/ledger/count-and-share.md) / `session-from-notes` | `code` @ `72748b4d` | yes | pass | extended `tests/test_ledger.py` | — | 648,458 |
+| `20260907T073039Z_count-and-share_session-from-notes_code-step-budget_r1` | [`count-and-share`](../scenarios/ledger/count-and-share.md) / `session-from-notes` | `code-step-budget` @ `b8028901` | yes | pass | extended `tests/test_ledger.py` | — | 389,584 |
+| `20260907T073310Z_stale-categories_session-from-notes_code_r1` | [`stale-categories`](../scenarios/ledger/stale-categories.md) / `session-from-notes` | `code` @ `72748b4d` | yes | pass | extended `tests/test_ledger.py` | — | 609,258 |
+| `20260907T073425Z_stale-categories_session-from-notes_code-step-budget_r1` | [`stale-categories`](../scenarios/ledger/stale-categories.md) / `session-from-notes` | `code-step-budget` @ `b8028901` | yes | pass | extended `tests/test_ledger.py` | — | 589,608 |
+| `20260907T073547Z_model-v3-propagation_session-from-notes_code_r1` | [`model-v3-propagation`](../scenarios/pipeline/model-v3-propagation.md) / `session-from-notes` | `code` @ `72748b4d` | no | fail | — | reasoning | 954,622 |
+| `20260907T073729Z_model-v3-propagation_session-from-notes_code-step-budget_r1` | [`model-v3-propagation`](../scenarios/pipeline/model-v3-propagation.md) / `session-from-notes` | `code-step-budget` @ `b8028901` | no | fail | — | reasoning | 672,370 |
+| `20260907T073914Z_duration-notes_session-from-notes_code_r1` | [`duration-notes`](../scenarios/sessions/duration-notes.md) / `session-from-notes` | `code` @ `72748b4d` | yes | pass | extended `tests/test_durations.py` | — | 444,408 |
+| `20260907T074042Z_duration-notes_session-from-notes_code-step-budget_r1` | [`duration-notes`](../scenarios/sessions/duration-notes.md) / `session-from-notes` | `code-step-budget` @ `b8028901` | yes | pass | extended `tests/test_durations.py` | — | 384,814 |
+| `20260907T074208Z_worst-first_session-from-notes_code_r1` | [`worst-first`](../scenarios/stocktake/worst-first.md) / `session-from-notes` | `code` @ `72748b4d` | yes | pass | — | — | 499,832 |
+| `20260907T074310Z_worst-first_session-from-notes_code-step-budget_r1` | [`worst-first`](../scenarios/stocktake/worst-first.md) / `session-from-notes` | `code-step-budget` @ `b8028901` | yes | pass | — | — | 550,384 |
+| `20260907T074420Z_cover-the-rejections_session-from-notes_code_r1` | [`cover-the-rejections`](../scenarios/suite/cover-the-rejections.md) / `session-from-notes` | `code` @ `72748b4d` | yes | pass | — | — | 432,056 |
+| `20260907T074530Z_cover-the-rejections_session-from-notes_code-step-budget_r1` | [`cover-the-rejections`](../scenarios/suite/cover-the-rejections.md) / `session-from-notes` | `code-step-budget` @ `b8028901` | yes | pass | — | — | 323,090 |
+| `20260907T074623Z_which-accounts-are-active_session-from-notes_code_r1` | [`which-accounts-are-active`](../scenarios/usage/which-accounts-are-active.md) / `session-from-notes` | `code` @ `72748b4d` | no | fail | — | reasoning | 402,570 |
+| `20260907T074732Z_which-accounts-are-active_session-from-notes_code-step-budget_r1` | [`which-accounts-are-active`](../scenarios/usage/which-accounts-are-active.md) / `session-from-notes` | `code-step-budget` @ `b8028901` | no | fail | — | reasoning | 976,856 |
 | `count-and-share_count-and-share_context-and-gate_r1_20260820T210951Z` | [`count-and-share`](../scenarios/ledger/count-and-share.md) / `count-and-share` | `context-and-gate` @ `25e89ea9` | no | tampered | `tests/test_ledger.py` (previous oracle) | — | 149,802 |
 | `count-and-share_count-and-share_context-and-gate_r1_20260820T212037Z` | [`count-and-share`](../scenarios/ledger/count-and-share.md) / `count-and-share` | `context-and-gate` @ `c2178cd2` | no | crash | — | stopping | 118,764 |
 | `count-and-share_count-and-share_context-and-gate_r1_20260820T213255Z` | [`count-and-share`](../scenarios/ledger/count-and-share.md) / `count-and-share` | `context-and-gate` @ `710447ea` | no | tampered | `tests/test_ledger.py` (previous oracle) | — | 385,018 |

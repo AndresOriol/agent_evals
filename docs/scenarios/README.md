@@ -13,7 +13,7 @@ workdir. Start from the table, or walk a topic line from its first scenario to
 its last.
 
 
-**11 scenarios across 10 topics.** See also: [what each agent version scored](../results/README.md) · [how the set is laid out](../../README.md).
+**12 scenarios across 11 topics.** See also: [what each agent version scored](../results/README.md) · [how the set is laid out](../../README.md).
 
 ## The set
 
@@ -29,6 +29,7 @@ its last.
 | [`duration-notes`](sessions/duration-notes.md) | `topic/sessions` | feature | L1 | `session-from-notes` | 6 / 2 | The requirement is in NOTES.md, not the prompt, and the README it makes false is graded like code. |
 | [`worst-first`](stocktake/worst-first.md) | `topic/stocktake` | trap | L2 | `session-from-notes`, `stocktake` | 8 / 3 | Three of the four are ordinary work. The fourth is the one the documentation |
 | [`cover-the-rejections`](suite/cover-the-rejections.md) | `topic/suite` | tests | L2 | `cover-the-rejections`, `session-from-notes` | 5 / 1 | A suite cannot be graded by running it, and the seed's suite is green for the wrong reason. |
+| [`ui-port-to-typescript`](ui-port/ui-port-to-typescript.md) | `topic/ui-port` | refactor | L3 | `session-from-notes` | 22 / 3 | Length, before anything else: the one scenario in the set that cannot be |
 | [`which-accounts-are-active`](usage/which-accounts-are-active.md) | `topic/usage` | ambiguous | L2 | `session-from-notes` | 3 / 6 | Two readings of one word, both supported by the tree, and nobody awake to be asked which one was meant. |
 
 ## By category
@@ -39,7 +40,7 @@ The eight categories the set is meant to cover. An empty one is a gap, not a cat
 - **feature** — [`duration-notes`](sessions/duration-notes.md)
 - **generative** — [`stock-export`](export/stock-export.md)
 - **tests** — [`cover-the-rejections`](suite/cover-the-rejections.md)
-- **refactor** — [`bots-to-base-class`](bots/bots-to-base-class.md)
+- **refactor** — [`bots-to-base-class`](bots/bots-to-base-class.md), [`ui-port-to-typescript`](ui-port/ui-port-to-typescript.md)
 - **long-context** — [`model-v3-propagation`](pipeline/model-v3-propagation.md)
 - **ambiguous** — [`which-accounts-are-active`](usage/which-accounts-are-active.md)
 - **trap** — [`count-and-share`](ledger/count-and-share.md), [`worst-first`](stocktake/worst-first.md)
@@ -51,7 +52,7 @@ L0 checks the harness rather than the agent; L3 is a scenario a strong session s
 - **L0** — [`retry-after-case`](http-headers/retry-after-case.md)
 - **L1** — [`stale-categories`](ledger/stale-categories.md), [`duration-notes`](sessions/duration-notes.md)
 - **L2** — [`threshold-off-by-one`](alerts/threshold-off-by-one.md), [`bots-to-base-class`](bots/bots-to-base-class.md), [`stock-export`](export/stock-export.md), [`count-and-share`](ledger/count-and-share.md), [`worst-first`](stocktake/worst-first.md), [`cover-the-rejections`](suite/cover-the-rejections.md), [`which-accounts-are-active`](usage/which-accounts-are-active.md)
-- **L3** — [`model-v3-propagation`](pipeline/model-v3-propagation.md)
+- **L3** — [`model-v3-propagation`](pipeline/model-v3-propagation.md), [`ui-port-to-typescript`](ui-port/ui-port-to-typescript.md)
 
 ## Topic lines
 
@@ -93,6 +94,10 @@ Each commit on a topic branch is a scenario, and each one is the previous scenar
 ### `topic/suite`
 
 1. [`cover-the-rejections`](suite/cover-the-rejections.md) — The parser is right and the suite does not say so
+
+### `topic/ui-port`
+
+1. [`ui-port-to-typescript`](ui-port/ui-port-to-typescript.md) — Port the UI core from Python to TypeScript, and delete what it replaces
 
 ### `topic/usage`
 
