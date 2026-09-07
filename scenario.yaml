@@ -1,0 +1,51 @@
+id: ui-port-to-typescript
+title: Port the UI core from Python to TypeScript, and delete what it replaces
+category: refactor
+difficulty: L3
+tags: [typescript, port, multi-file, toolchain, notes-driven, docs, session, long]
+
+# The one scenario in the set that is meant to be *long*. Every other task
+# finishes in about twenty supersteps, which is why a 120-step limit could kill
+# a healthy run for weeks without any batch noticing
+# (evals/CONFIGS.md, code-step-budget). Three modules, a language change, a
+# toolchain that is not on the execution allowlist, a deletion and a
+# documentation rewrite: the work is ordinary and there is simply a lot of it.
+context_mode: none
+timeout_s: 5400
+
+# The behaviour contract. A port is graded on keeping these true, so editing
+# them is editing the goalposts.
+immutable:
+  - tests/test_uikit.py
+
+# Graded by running the built modules under `node`, not by reading the source:
+# a port that looks right and does not work is exactly what this has to catch.
+fail_to_pass:
+  - evaluation/tests/test_ui_port_hidden.py::test_the_port_runs_and_reports_every_behaviour
+  - evaluation/tests/test_ui_port_hidden.py::test_a_new_session_starts_empty_and_idle
+  - evaluation/tests/test_ui_port_hidden.py::test_sessions_survive_a_restart
+  - evaluation/tests/test_ui_port_hidden.py::test_sessions_are_listed_newest_activity_first
+  - evaluation/tests/test_ui_port_hidden.py::test_updating_replaces_messages_and_status
+  - evaluation/tests/test_ui_port_hidden.py::test_updating_an_unknown_session_is_a_no_op
+  - evaluation/tests/test_ui_port_hidden.py::test_deleting_twice_is_harmless
+  - evaluation/tests/test_ui_port_hidden.py::test_a_corrupt_store_reads_as_empty_rather_than_throwing
+  - evaluation/tests/test_ui_port_hidden.py::test_the_whole_history_is_replayed_oldest_first
+  - evaluation/tests/test_ui_port_hidden.py::test_an_unknown_role_reads_as_user
+  - evaluation/tests/test_ui_port_hidden.py::test_blank_turns_are_dropped
+  - evaluation/tests/test_ui_port_hidden.py::test_a_short_title_is_used_whole
+  - evaluation/tests/test_ui_port_hidden.py::test_a_long_title_is_cut_on_a_word_boundary
+  - evaluation/tests/test_ui_port_hidden.py::test_an_empty_prompt_still_gets_a_title
+  - evaluation/tests/test_ui_port_hidden.py::test_the_subprocess_contract_is_unchanged
+  - evaluation/tests/test_ui_port_hidden.py::test_a_missing_workspace_is_still_refused
+  - evaluation/tests/test_ui_port_hidden.py::test_the_reply_is_the_tail_after_the_marker
+  - evaluation/tests/test_ui_port_hidden.py::test_the_three_ways_a_run_ends_are_distinguished
+  - evaluation/tests/test_ui_port_hidden.py::test_the_python_package_is_gone
+  - evaluation/tests/test_ui_port_hidden.py::test_the_typescript_sources_exist
+  - evaluation/tests/test_ui_port_hidden.py::test_the_typescript_is_compiled_strictly
+  - evaluation/tests/test_ui_port_hidden.py::test_the_readme_describes_the_port_rather_than_the_python
+
+# True before the change and still true after it.
+pass_to_pass:
+  - evaluation/tests/test_ui_port_hidden.py::test_the_visible_contract_suite_still_exists
+  - evaluation/tests/test_ui_port_hidden.py::test_the_notes_entry_is_not_deleted
+  - evaluation/tests/test_ui_port_hidden.py::test_no_runtime_dependency_was_added

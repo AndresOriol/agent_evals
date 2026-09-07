@@ -1,3 +1,8 @@
 .worktrees/
 __pycache__/
 *.pyc
+
+# Installed by the toolchain, not part of the port. `dist/` is deliberately
+# absent from this list: the notes ask for the built output to be committed.
+node_modules/
+.ui_data/
